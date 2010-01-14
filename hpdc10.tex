@@ -316,8 +316,70 @@ discover the negotiator for their site.
 
 \section{Related Work}
 \label{related_work}
+There are many projects that seek to provide easy to user resources for HTC
+and opportunistic computing.  We focus on two approaches whose focus is
+user-friendly dynamic grids: PVC~\cite{pvc} and GPU~\cite{gpu}.
+
+PVC or Private Virtual Clusters creates instant grids using a
+PVC specific virtual network and task scheduler as well as VMs to isolate
+remote jobs from users' resources.  Resources discover each other through a
+system broker, though it is unclear how the resources are configured with the
+knowledge of the broker, nor how a broker is configured.  Peers use the broker
+to form direct communication links with each other through TCP NAT traversal.
+Due to the requirement of a broker at least one machine must be public
+addressable and if the node goes offline, it could prevent resources from
+communicating with each other.  Also PVC does not provide a VPN but rather a
+VN, since the links between peers are not encrypted, though they are
+authenticated through the broker in a form of KDC.  It is unclear what the node
+constraints in a PVC system are, though experiments are limited to 8 nodes.
+PVC has not been released to the public in source or binary format.  In
+general, the PVC paper is unclear on the scalability and self-configuring of
+the approach.  Though with focus on the broker, it appears that our approach
+is significantly more decentralized.  Also our approach is both available in
+source and binary formats.
+
+GPU or Global Processing Unit uses the Gnutella P2P system to create
+a completely decentralized computing grid that runs on the contributors system.
+The authors state that the expected size for grids range from 5 to 15 nodes.  
+While the authors do not mention NAT traversal, there are many Gnutella systems
+that do support various forms of it.  There is no mention of providing safety
+to the users' resources from malicious tasks.  While GPU provides easy
+configurability, it lacks the ability to run jobs in a sandbox and support large
+pools of resources.
+
+There are many other desktop grid environments that use Boinc as the underlying
+method to push jobs.  As we explained earlier, Boinc uses a few approaches that
+we found undesirable for our requirements with the primary issue that Boinc job
+scheduling is heavily centralized.  In addition, for Boinc systems that allow
+running arbitrary applications, it is unclear how secure they are.
+
 \section{Evaluation}
 \label{evaluation}
+In this evaluation, we focus on the time required to create varying size
+distributed grids.  To start the experiment, we begin with an existing
+GroupVPN and GroupAppliance group with the configuration floppy ready as well
+as an already booted negotiator and client node.  Then we boot varying sizes of
+worker nodes in three different environments and execute a job that requires
+them to sleep for 5 minutes.  This experiment shows how long it takes resources
+to become connected to the negotiator and then the client scheduling machine.
+To calculate the time to become connected with the negotiator, we wait for
+condor to officially recognize all resources through ``condor\_status''.  To
+calculate the time to become connected with the client, we subtract 5 minutes
+from the completion of the last task.
+
+The environment we have chosen are EC2, University of Florida, and North
+Eastern University.  We chose EC2 as a representation of adding cloud resources
+and that all the resources have public IP addresses as such there will be no
+need for NAT traversal.  At the University of Florida, all resources will run
+as virtual machines and are behind 2 layers of NAT devices.  At North Eastern
+University all resources are behind a single ``iptables'' based NAT.  We boot
+from 1, 5, 10, 20, 25, and 50 resources in each environment 5 times to obtain
+our values.  The time starts as soon as the scripts to deploy the resources
+are executed and conclude when all resources show in ``condor\_status''.
+Therefore this includes the time it takes to copy the VMs to each host, start
+the VMs, connect to the VPN, and finally with Condor.  Our results are
+presented in~\ref{fig:results}.
+
 \section{Conclusion and Real Use Cases}
 \label{conclusion}
 In this paper, we presented a novel approach to creating distributed,
