@@ -2,6 +2,5 @@ latex DecentralizedGrids -interaction=nonstopmode
 bibtex DecentralizedGrids
 latex DecentralizedGrids -interaction=nonstopmode
 latex DecentralizedGrids -interaction=nonstopmode
-dvips -t letter DecentralizedGrids.dvi
-ps2pdf DecentralizedGrids.ps
+dvipdfm -p letter DecentralizedGrids.dvi
 xpdf DecentralizedGrids.pdf

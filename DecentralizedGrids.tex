@@ -12,30 +12,36 @@
 \usepackage{footnote}
 \usepackage{amsmath}
 
+\setlength{\parskip}{0pt}
+\setlength{\parsep}{0pt}
+\setlength{\headsep}{0pt}
+\setlength{\topskip}{0pt}
+\setlength{\topmargin}{0pt}
+\setlength{\topsep}{0pt}
+\setlength{\partopsep}{0pt}
+
 \widowpenalty=10000
 \clubpenalty=10000
 
 \begin{document}
 
-\title{On the Use of Autonomic Groups for\\
-Distributed, Decentralized, Dynamic\\
-High-Throughput Computing}
+\title{On the Use of Group-Oriented Autonomic VPNs for High-Throughput Computing}
 
 \author{
 David Isaac Wolinsky and Renato Figueiredo
 \\
-University of Florida, 
+University of Florida
 \\
 }
 
 \maketitle
 
 \begin{abstract}
-High-throughput computing (HTC) attempts to acquire and use as many resources as
-possible, both dedicated and opportunistic computing cycles.  In this paper, we
-explore the challenge of connecting resources across administrative domains from
-different institutions and into users' homes.  Several works discuss the usage
-of virtualization and middleware as means to connect and secure resources.  In
+High-throughput computing (HTC) attempts to acquire and use as many resources,
+both dedicated and opportunistic, as possible.  In this paper, we explore the
+challenge of connecting resources across administrative domains from different
+institutions and into users' homes.  Several works discuss the usage of
+virtualization and middleware as means to connect and secure resources.  In
 this paper, we present methods that automate the configuration of resources
 through group-based Web 2.0 interfaces and connect the resources through a
 peer-to-peer (P2P) based virtual private network (VPN) creating secure ad-hoc,
@@ -50,69 +56,80 @@ and for a single user to submit and complete jobs on all the resources.
 High throughput computing (HTC) is a form of opportunistic computing that unlike
 high performance computing (HPC), which seeks powerful resources, benefits from
 ad-hoc, arbitrary resources including computers found in computer labs, homes,
-and offices as well as cloud resources and retired HPC clusters.  The two most
-significant challenges in creating a HTC clusters across administrative domains
-are 1) restricting remote user access to executing in a doubly secure
-environment that prevents access to external resources from inside the cluster
-and internal resources from outside the cluster and 2) handling firewalls and
-network address translation (NAT) that prevent direct communication between
-peers in the cluster.
+and offices as well as cloud resources and retired HPC clusters.  Creating and
+maintaining HTC systems that cross administrative domains, grids, require
+expertise in networks, operating systems, and grid middleware to configure
+the sites homogenously and guarantee connectivity amongst sites involved.
 
-Administrators only allow users who have permission to access resources.  In
-the HTC realm, the burden this places upon administrators varies with the type
-of environment and the middleware being used.  Commonly, each user has an
-account to access the resources directly or through a central service provider,
-requiring the administrator create an account and enforce quotas on disk,
-memory, and processor usage.  When a problem arrises, it is the responsibility
-of the administrator to contact both the individual and individual's
-organization.  Ideally resources should be configured in such a way to sandbox
-the environment to eliminate or at least limit potential user mishaps.
+Administrators each have their own way of configuring resources and may be
+hesitant or unwilling to configure resources in a way that conflicts with the
+environmental norm.  This conflicts with the requirements of merging resources
+across administrative domains as computing resources are typically configured
+uniformly having a common environment and network rules.  Administrators would
+prefer not having exceptional rules for a subset of resources under their
+domain and do not want to grant access to lesser known, remote users.  Network
+constraints such as firewalls and network address translation (NAT) can prevent
+cross domain communication, though this may be amerliorated by exceptions,
+additional rules may be required for each new cluster or resource added to the
+cross domain grid.
+
+HTC clusters are not limited to large systems requiring dedicated
+administrators, there are many systems that discuss the use of desktop or
+opportunistic grids, like Boinc~\cite{boinc} and PVC~\cite{pvc}.  While Boinc
+solutions may be easily configured, they are limited in the types of jobs that
+can be run and the individuals that have the ability to run tasks as the jobs
+must be ambiguously parallel and the task scheduler is heavily centralized.
+While PVC provides methods that allow parallel tasks and are more
+decentralized, the approach has scalability concerns and relies on a centralized
+node to assist in node connectivity.  In general, there are no home or
+opportunistic solutions that provide scalable, decentralized systems.
 
 Connecting resources distributed across the Internet can be challenging due to
 limit of available IP (Internet Protocol) addresses available to an
-organization, which has been ameliorated by network address translation (NAT),
-though NAT devices and firewalls create issues in forming direct connectivity
-between remote sites.  When creating HTC systems across a few institutions
-approaches that use Internet Service Provider VPNs, Layer 2 Tunneling Protocol
-(L2TP) VPNs, and other user-configured VPN approaches can be used.  Though
-because these require centralization and static links, as systems expand
-dynamically, the cost of manually configuring these environments are no longer
-reasonable.
+organization.  NAT further complicates the issue by limiting the formation of
+direct links between remote sites without external assistance.  When creating
+HTC systems across a few institutions approaches that use Internet Service
+Provider VPNs, Layer 2 Tunneling Protocol (L2TP) VPNs, and other
+user-configured VPN approaches can be used.  Most solutions require some form
+of centralization and static links, as systems expand dynamically, the cost of
+manually configuring these environments are no longer reasonable.  VPNs do,
+however, provide means of securing the system and through the use of proper
+middleware, can allow users to interact with each others resources without
+the local user having to create a unique account for each remote user.
 
-The architecture constraints described can exist in real systems such as a
-collaborative academic environment linking institutions and external users.
-Many researchers have a need for resources occassionally and rather than
-investing in a large pool of dedicated resources for a single institution they
-could pool their resources together using HTC mechanisms.  The resulting system
-allows individuals the opportunity to complete their jobs quickly and ensure
-that their resource contribution is not idle when locally unused.  This use
-case potentially introduces a new issue where the users may not be experts nor
-have the ability to include an expert in the construction of the system.
+The architecture constraints described exists in real systems such as our
+Archer project~\cite{archer}, a collaborative academic environment linking
+institutions and external users for the purpose of computer architecture
+research.  Many researchers have a need for resources occassionally and rather
+than investing in a large pool of dedicated resources for a single institution
+they are able to pool their resources together using HTC mechanisms.  The
+resulting system allows individuals the opportunity to complete their jobs
+quickly and ensure that their resource contribution is not idle when locally
+unused.  This use case potentially introduces a new issue where the users may
+not be experts nor have the ability to include an expert in the construction of
+the system.
 
-Explicity the requirements that we set for such systems are 1) users should
-be able to connect to the grids using their own resources so that no
-administrators need to maintain operating system accounts for users, 2)
-resources can communicate with each other with no configuration from the users
-regardless of the network constraints, 3) tasks that run inside the grid do not
-have network access to external resources, 4) external resources do not have
-network access to the grid, 5) users should have priority on their institutions
-and own contributed resources, 6) malicious users can be removed and at least
-confined to only using their own resources, and 7) resources should be able to
-be easy to add and remove.  In this paper, we describe our approach to handling
-these requirements to enable enable the creation of an ad-hoc, dynamic,
-decentralized HTC grids.
+Explicity the requirements for a system in these environments are 1) users
+should be able to easily add and remove resources, 2) resources should not
+require configuration to allow remote users access, 3) tasks that run inside
+the grid should not have access to external resources, 4) external resources
+should not be able to access the grid, 5) resource priority should be granted
+to the resource's owner, and 6) malicious users should be able to be removed.
+In this paper, we describe our approach to handling these requirements to
+enable the creation of an dynamic, decentralized HTC grid through a novel
+approach involving decentralized overlays enabling a self-configuring VPN
+and HTC environment.  
 
-Our contributions in this paper focus on a novel self-configuring grid
-environment through the use of a group based Web 2.0 environment that can
-connect distributed physical, virtual, and cloud resources through a P2P-based
-VPN that traverses NATs and firewalls without user configuration.  The use
-generic physical and cloud resources makes our approach unique in that it is not
-limited to preconfigured virtual machines (VMs), but also allow users to easily
-create their own environments.  To do this, we have released our system as a set
-of software packages (e.g., deb, rpm), which can be easily installed through
-package managers (e.g., APT, Yum) by non-experts in a matter of minutes.
-All would be for naught without a task scheduler, as such we compare some
-popular task schedulers against our requirements.
+Our previous work, Grid Appliance~\cite{grid_appliance} packaged
+IPOP~\cite{ipop} for decentralized virtual networking and other grid
+essentials enabling easy grid deployment.  Though the approach was highly
+coupled, requiring additional expertise for users to create and manage their
+own independent grids.  This paper extends that work to enable non-users to
+create and manage their own grids through a group-oriented model embodied in a
+web 2.0 infrastructure providing a public key infrastructure along with VPN and
+grid configuration.  The approach describes methods that can be used by
+non-experts to configure and combine resources from virtual, physical, and
+cloud environments.
 
 The rest of this paper is organized as follows.  Section~\ref{our_system}
 describes the architecture of our system.  A qualitative comparison of our
@@ -148,13 +165,14 @@ By analyzing our first requirement, we quickly realized that by default none of
 the task schedulers, besides Condor, could support an environment that did not
 have a centralized user list.  While Condor does support similar behavior, it has
 separated the components that keep track of resources and negotiates resource
-alocation from those that make the resource requests and submit tasks.  This
+allocation from those that make the resource requests and submit tasks.  This
 abstraction allows for a simple centralized system to maintain the grid without
-requiring any runtime configuration.  This is where the importance of a VPN
-comes into place, to ensure that only members of the VPN have access to grid
-resources.  Note though that other task schedulers could potentially provide
-this feature through modification or additional middleware, like 
-Globus~\cite{globus_toolkit}.  This amongst other reasons, such as it being
+requiring any runtime configuration.  In addition, Condor allows open
+unauthenticated access to the grid as long as a peer is within a subnet, which
+is where a VPN comes into place ensuring that only members of the VPN have
+access to grid resources.  Note though that other task schedulers could
+potentially provide this feature through modification or additional middleware,
+like Globus~\cite{globus_toolkit}.  This amongst other reasons, such as it being
 free, having an active community, and focus on opportunistic cycles, led us to
 select Condor for our task scheduler.  In the list of requirements, Condor also
 handles the ability to assign groups or institutions privilege on their own
@@ -196,9 +214,9 @@ available for use.
 One promising approach is IPOP~\cite{ipop}, though IPOP lacks the ability to
 secure links, it provides a P2P virtual network with decentralized and
 self-configuring link creation with NAT traversal support that works with
-approximately 90\% of NATs.  IPOP uses a distributed data store embeded in
+approximately 90\% of NATs.  IPOP uses a distributed data store embedded in
 the P2P infrastructure known as a distributed hash table (DHT) to assist in
-address allocation and resolution.  In~\cite{nsdi10}, we presented GroupVPN,
+address allocation and resolution.  In~\cite{groupvpn}, we presented GroupVPN,
 which transforms IPOP into an automated VPN with enhanced NAT handling through
 the use of decentralized relays (proxies) in IPOP, enabling two hop, low latency
 connections when NAT and firewall traversal fails.
@@ -231,10 +249,10 @@ hardware appliances, the recent resurgence of virtualization initiated by
 VMware has made software appliances by means of virtual appliances popular.
 Soon thereafter, cloud computing has become popular in large part thanks to
 Amazon and EC2.  Both virtual and cloud resources present themselves as cheap
-computing for HTC and opportunistic computing purposes, because both can be
+computing for HTC and opportunistic computing purposes, because they can be
 setup in such a way as to have no or limited effect on users' computers and
 can be shutdown when no longer in use.  Though users have released both virtual
-and cloud appliances to tap into these resources they still require
+and cloud appliances to tap into these resources, they still require
 configuration from the user so that they can connect with each other and to form
 a grid and the packaged solutions cannot easily be applied to hardware resources.
 
@@ -242,13 +260,14 @@ Our solution is the creation of a generic software stack that self-configures
 based upon a user input configuration file.  The contents of a configuration
 file are the type of resource such as dedicated compute node, job scheduling
 node, mixed, or the job negotiating central server; the users group and
-username on the site; and the grid's GroupVPN configuration data.  The configuration file is
-generated from a Web 2.0 group based infrastructure called GroupAppliance, using
-a single GroupVPN group to connect all members of the grid together in a VPN but
-using the GroupAppliance group to distinguish their resource contributions.
-Thus many GroupAppliances groups can be linked together through a GroupVPN
-group.  By distingushing resource contributions, users are able to get credit
-and gain priority to their resources when submitting tasks to run.
+username on the site; and the grid's GroupVPN configuration data.  The
+configuration file is generated from a Web 2.0 group based infrastructure
+called GroupAppliance, using a single GroupVPN group to connect all members of
+the grid together in a VPN but using the GroupAppliance group to distinguish
+their resource contributions.  Thus many GroupAppliances groups can be linked
+together through a GroupVPN group.  By distingushing resource contributions,
+users are able to get credit and gain priority to their resources when
+submitting tasks to run.
 
 When a user downloads the configuration file from the GroupAppliance
 infrastructure, the data is stored in a floppy disk image that can be used on
@@ -321,23 +340,21 @@ There are many projects that seek to provide easy to user resources for HTC
 and opportunistic computing.  We focus on two approaches whose focus is
 user-friendly dynamic grids: PVC~\cite{pvc} and GPU~\cite{gpu}.
 
-PVC or Private Virtual Clusters creates instant grids using a
-PVC specific virtual network and task scheduler as well as VMs to isolate
-remote jobs from users' resources.  Resources discover each other through a
-system broker, though it is unclear how the resources are configured with the
-knowledge of the broker, nor how a broker is configured.  Peers use the broker
-to form direct communication links with each other through TCP NAT traversal.
-Due to the requirement of a broker at least one machine must be public
-addressable and if the node goes offline, it could prevent resources from
-communicating with each other.  Also PVC does not provide a VPN but rather a
-VN, since the links between peers are not encrypted, though they are
-authenticated through the broker in a form of KDC.  It is unclear what the node
-constraints in a PVC system are, though experiments are limited to 8 nodes.
-PVC has not been released to the public in source or binary format.  In
-general, the PVC paper is unclear on the scalability and self-configuring of
-the approach.  Though with focus on the broker, it appears that our approach
-is significantly more decentralized.  Also our approach is both available in
-source and binary formats.
+PVC or Private Virtual Clusters creates instant grids using a PVC specific
+virtual network and task scheduler as well as VMs to isolate remote jobs from
+users' resources.  Resources discover each other through a system broker,
+though it is unclear how the resources are configured with the knowledge of the
+broker, nor how a broker is configured.  Peers use the broker to form direct
+communication links with each other through TCP NAT traversal.  Due to the
+requirement of a broker at least one machine must be public addressable and if
+the node goes offline, it could prevent resources from communicating with each
+other.  PVC does not provide message encryption of authentication thus the
+system does not use a VPN but a VN, though links are authenticated through the
+broker acting as a KDC.  Scalability constraints using PVC are unclear, because
+experiments are limited to 8 nodes.  PVC has not been released to the public in
+source or binary format.  In contrast, our approach focuses on scalability and
+self-configuration through a decentralized approach and is available as both
+source and binary.
 
 GPU or Global Processing Unit uses the Gnutella P2P system to create
 a completely decentralized computing grid that runs on the contributors system.
@@ -383,26 +400,25 @@ presented in~\ref{fig:results}.
 
 \section{Conclusion and Real Use Cases}
 \label{conclusion}
-In this paper, we presented a novel approach to creating distributed,
-decentralized, and dynamic grids.  To make the environments self-configuring,
-we rely on configuration data distributed through a user-friendly Web 2.0 group
-based infrastructure that provides configuration for the grid and VPN.  The VPN
-provides a completely decentralized system that has no single point of failure.
-The one lacking feature of our approach is the single job negotiator, we are
-actively working with the Condor group to improve this approach.  The key
-component that makes our approach attractive for non-experts is that they never
-need access a console to create a HTC cluster for themselves.
+In this paper, we presented a novel approach to creating autonomic grid through
+a configuration data generated and distributed through a user-friendly Web 2.0
+group-based infrastructure providing configuration for both the grid and the
+VPN.  The VPN provides a completely decentralized system having no single point
+of failure.  The one lacking feature of our approach is the single job
+negotiator, we are actively working with the Condor group to improve this
+approach.  The key component that makes our approach attractive for non-experts
+is that they never need access a console to create a HTC cluster for themselves.
 
-We have several real systems using all or components of the features described
-in this paper.  Over the past 2 years, we have had an active grid deployed for
-computer architecture research, Archer~\cite{archer}.  Archer currently spans
-four universities with 500 resources, we have had 100s of students and
-researchers submitting jobs with over 150,000 hours of total job execution in
-the past year alone.  Groups at the Universities of Florida and Clemson as well
-as a Swiss university have used it as a tool to teach grid computing.  Purdue
-is planning a large campus grid that will use the GroupVPN to connect resources
-together.  Most recently, a grid at La Jolla Institute for Allergy and
-Immunology went live with minimal communication with us.
+We have several real systems using the system described in this paper.  Over
+the past 2 years, we have had an active grid deployed for computer architecture
+research, Archer~\cite{archer}.  Archer currently spans four universities with
+500 resources, we have had 100s of students and researchers submitting jobs
+with over 150,000 hours of total job execution in the past year alone.  Groups
+at the Universities of Florida and Clemson as well as a Swiss university have
+used it as a tool to teach grid computing.  Purdue is planning a large campus
+grid that will use the GroupVPN to connect resources together.  Most recently,
+a grid at La Jolla Institute for Allergy and Immunology went live with minimal
+communication with us.
 
 \bibliographystyle{abbrv}
 \small{
