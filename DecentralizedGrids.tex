@@ -81,10 +81,10 @@ administrators: there are many systems that discuss the use of desktop or
 opportunistic grids, such as Boinc~\cite{boinc} and PVC~\cite{pvc}.  While Boinc
 solutions may be easily configured, the approach relies on a centralized
 scheduler and that applications be compiled using Boinc API.  While PVC
-provides enables parallel tasks and more decentralized system configuration,
-the approach has scalability concerns and relies on a centralized node to
-assist in node connectivity.  In general, there exists no solution that
-provides scalable, self-configuring, decentralized grid systems for non-experts.
+enables parallel tasks and more decentralized system configuration, the
+approach has scalability concerns and relies on a centralized node to assist in
+node connectivity.  In general, there exists no solution that provides
+scalable, self-configuring, decentralized grid systems for non-experts.
 
 Connecting resources distributed across the Internet can be challenging due to
 limit of IP (Internet Protocol) addresses available to an organization.  NAT
@@ -130,7 +130,7 @@ grids.  This paper extends that work to enable non-experts to create and manage
 their own grids through a group-oriented model embodied in a web 2.0
 infrastructure providing a public key infrastructure along with VPN and grid
 configuration.  The approach describes methods that can be used to easily
-to configure and combine resources from virtual, physical, and cloud
+configure and combine resources from virtual, physical, and cloud
 environments.
 
 The rest of this paper is organized as follows.  Section~\ref{middleware}
@@ -165,7 +165,7 @@ components that keep track of resources and negotiates resource allocation from
 those that make the resource requests and submit tasks.  This abstraction
 allows for a simple centralized system to maintain the grid without requiring
 any run-time configuration.  In addition, Condor allows open unauthenticated
-access to the grid as long as a peer is within a subnet, using a VPN ensures
+access to the grid as long as a peer is within a subnet.  Using a VPN ensures
 that that only members of the VPN have access to grid resources.  To enable this
 behavior in other grid schedulers would require modification or additional
 middleware, like Globus~\cite{globus_toolkit}.  Other reasons motivating the
@@ -280,7 +280,7 @@ user could setup a storage cloud where the cloud instances could retrieve the
 floppy.  Because the floppy contains private GroupVPN configuration data it
 should not stored on public resources.
 
-Upon booting, the grid configuration scripts parses the floppy to determine how
+Upon booting, the grid configuration scripts parse the floppy to determine how
 to configure the machine.  Negotiators insert an ad into the DHT, whereas
 resources and task submitters query the DHT for the list of negotiators,
 selecting one and relegating the rest for flocking.  At which point, tasks
@@ -298,43 +298,42 @@ that can be installed in arbitrary environments and through the use of package
 managers (APT and YUM) handle configuration such that the requirements listed
 in the introduction are handled.  Packages can be provided that automatically
 install and configure the task scheduling middleware and a VPN as well as
-sandbox the environment limiting users to accessing the virtual network and not
-external resources such as other local resources and the Internet.  The
+sandbox the environment, limiting users network access to the virtual network
+and not external networks such as other local resources and the Internet.  The
 remaining components are configurable through the GroupAppliances interface and
 decentralized through the DHT.
 
 The most important components in securing an environment are limiting internal
 and external access from inside the system.  Specifically, internal resources
-should avoid password enabled accounts to avoid cases where users submit tasks
-that attempt to provide more privileged access to the user.  In the event that
-this is not possible, ensuring that the task scheduler runs as user without
-the ability to switch permissions can prevent this attack, for example,
-preventing \textit{su} access in Linux.  By default, Condor will run jobs as
-either nobody or the user named ``Condor''.  This limits access to many of the
-core components of the system already, but it does not limit the users ability
-to read files that allow reading from anyone on the system and the ability to
-communicate to external resources from inside the machine.  Making the user
-data directory readable only by the user and group who own the files and
-directories will prevent remote users from reading local user personal data.
-Limiting access to external resources can be implemented via a firewall,
-allowing the Condor user to only have the ability to send packets over the
-virtual network.
+have no password enabled accounts to avoid cases where users submit tasks that
+attempt to provide more privileged access to the user.  In the event that a
+passworded account is necessary, such as on a client machine, the system is
+configured to prevent permission switching by the task scheduler user, in
+Linux, for example, this is done by limiting \textit{su} access.  By default,
+Condor runs jobs as either nobody or the user named ``Condor''.  This limits
+access to many of the core components of the system already, but it does not
+limit the users ability to read files that allow reading from anyone on the
+system and the ability to communicate to external resources from inside the
+machine.  The user data directory is made readable by only the user and group
+who own the files and directories preventing remote users from reading local
+user personal data.  Limiting access to external resources has been implemented
+by a firewalling, allowing the Condor user to only have the ability to send
+packets over the virtual network.
 
-For job submission nodes, there is one more consideration, we attempt to make
-these as user-friendly as possible.  To do this, we have enabled file system
-and remote access capabilities for the machines so that a user on the same
+Job submission nodes have an additional consideration emphasizing
+user-friendliness.  To do this, file system access through NFS and Samba
+as well as remote access through SSH are enabled to allow users on the same
 host can access the resources without having to configure additional utilities
-or using the VMs interface, if available.  Though, we do not want users to
-access the data through the virtual network or the Internet from a public
-address, with regard to virtual machines, we create a second network card that
-supports host-only connectivity.  By binding all user applications to use the
-network interface, they do not require extra security enhancements.
-Alternatively, applications like SSH could be enabled to only allow private key
-based login.  In our model, we expect only dedicated compute nodes and possibly
-the job negotiator running on physical or cloud resources and user nodes to
-use VMs.
+or using the VMs interface.  To prevent access through the virtual network or
+Internet for security purposes, a second network card connects the system to
+a host-only interface.  By binding all user applications to use the network
+interface, they do not require extra security enhancements.  Alternatively,
+applications like SSH could be enabled to only allow private key based login.
+In general, only dedicated compute nodes and possibly the job negotiator will
+run on physical or cloud resources, whereas clients will most likely
+exclusively use VMs.
 
-To prepare a system is straight-forward: users configure the package manager to
+preparing the system is straight-forward: users configure the package manager to
 link to a package distribution site and then install the desired packages for
 the grid resource.  When finished, the user can restart the device or restart
 the grid service with the floppy image adding a new resource to the grid.  The
@@ -367,44 +366,45 @@ tasks.  While GPU provides easy configuration, it lacks the ability to run
 jobs in a sandbox and support large pools of resources.
 
 There are many other desktop grid environments that use Boinc as the underlying
-method to push jobs.  As we explained earlier, Boinc uses a few approaches that
-we found undesirable for our requirements with the primary issue that Boinc job
+method to push jobs.  As explained earlier, Boinc uses a few approaches that
+are undesirable for our requirements with the primary issue that Boinc job
 scheduling is heavily centralized.  In addition, for Boinc systems that allow
 running arbitrary applications, it is unclear how secure they are.
 
 \section{Evaluation}
 \label{evaluation}
-This evaluation focuses on the time required to create and utilize a grid
-consisting of various distributed resources built a reference implementation of
-the system described in this paper.  Using VMware resources behind a Cisco
-and ``iptables'' NAT at the University of Florida, KVM resources behind an
-``iptables'' and KVM NAT at Northeastern University, and Cloud resources
-provided by EC2, pools of 50 resources from each site were booted independently
-and then together, resulting in 4 different test runs.  The resources
-connect to an existing pool consisting of a negotiator and client node.  Once
-all the resources have connected, the client submits a job to each resource.
-Three timespans are measured:  start - begins with starting the experiment
-including the copying of files and creation of instances until all resources
-have been powered on, connect - includes start time and ends when all resources
-appear in ``condor\_status'' and includes start time, and run - time from the
-submission to the conclusion of a 5 minute job to all resources Like connect,
-run measures the time for VPN connections, only from the client to the resources
-instead of from the negotiator.  All tasks are automated through scripts with
-human interaction required only to start the events of grid boot and job
-submission.  Results are presented in Figure~\ref{fig:results}.
+This evaluation evaluates the validity of this approach by evaluating the time
+time required to create and utilize a grid consisting of various distributed
+resources using a reference implementation of the system described in this
+paper.  Using VMware resources behind a Cisco and ``iptables'' NAT at the
+University of Florida (UF), KVM resources behind an ``iptables'' and KVM NAT at
+Northeastern University (NEU), and cloud resources provided by EC2, pools of 50
+resources from each site were booted independently and then together, resulting
+in 4 different test runs.  The resources connect to an existing pool consisting
+of a negotiator and client node.  Once all the resources have connected, the
+client submits a job to each resource.  Three timespans are measured: ``start''
+- begins with starting the experiment including the copying of files and
+creation of instances until all resources have been powered on, ``connect'' -
+begins with ``start'' though ends when all resources appear in
+``condor\_status'' and includes start time, and run - time from the submission
+to the conclusion of a 5 minute job to all resources Like connect, run measures
+the time for VPN connections, only from the client to the resources instead of
+from the negotiator.  All tasks are automated through scripts with human
+interaction required only to start the events of grid boot and job submission.
+Results are presented in Figure~\ref{fig:results}.
 
 \begin{figure}[ht]
 \setlength{\itemsep}{0pt}
 \setlength{\parskip}{0pt}
 \centering
 \begin{tabular}[c]{|m{1.2cm}||m{1.3cm}|m{1.3cm}|m{1.3cm}|m{1.3cm}|} \hline
-& 50 - EC2 & 50 - NEU & 50 - UF & 50 - Each \\ \hline\hline
+& 50 - EC2 & 50 - NEU & 50 - UF & 150 - All \\ \hline\hline
 Start & 2:44 & 10:21 & 20:23 & 21:14 \\ \hline
 Connect & 5:10 & 21:47 & 24:16 & 38:27\\ \hline
 Run & 7:15 & 6:35 & 5:53 & 21.19 \\ \hline
 \end{tabular}
-\caption{Time in seconds to start and connect resources to an existing
-grid and run jobs from a client using the stack described by the paper.}
+\caption{Time in minutes:seconds to start and connect resources to an existing
+grid and run jobs from.}
 \label{fig:results}
 \end{figure}
 
