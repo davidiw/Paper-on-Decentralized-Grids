@@ -380,25 +380,25 @@ the system described in this paper.  Using VMware resources behind a Cisco
 and ``iptables'' NAT at the University of Florida, KVM resources behind an
 ``iptables'' and KVM NAT at Northeastern University, and Cloud resources
 provided by EC2, pools of 50 resources from each site were booted independently
-and then in parallel.  The resources connected with an existing GroupVPN and
-GroupAppliance group with a negotiator and client node already online.  Upon
-all the resources connecting, the client submits a job to all resources.  The
-time required to deploy the resources starts with the beginning of copying
-files and ends when the last VM has been started.  Time for the machines to
-connect includes this time up until the time when all of the deployed resources
-appear in ``condor\_status''.  Time for connectivity begins when a client
-client submits a job to sleep for 5 minutes to every resource and all tasks
-have completed.  All tasks are automated through scripts with human interaction
-required only to start the events of grid boot and job submission.  Results are
-presented in Figure~\ref{fig:results}.
+and then together, resulting in 4 different test runs.  The resources
+connect to an existing pool consisting of a negotiator and client node.  Once
+all the resources have connected, the client submits a job to each resource.
+Three timespans are measured:  start - begins with starting the experiment
+including the copying of files and creation of instances until all resources
+have been powered on, connect - includes start time and ends when all resources
+appear in ``condor\_status'' and includes start time, and run - time from the
+submission to the conclusion of a 5 minute job to all resources Like connect,
+run measures the time for VPN connections, only from the client to the resources
+instead of from the negotiator.  All tasks are automated through scripts with
+human interaction required only to start the events of grid boot and job
+submission.  Results are presented in Figure~\ref{fig:results}.
 
-\begin{small}
 \begin{figure}[ht]
 \setlength{\itemsep}{0pt}
 \setlength{\parskip}{0pt}
 \centering
-\begin{tabular}[c]{|m{1.5cm}||m{1.2cm}|m{1.2cm}|m{1.2cm}|m{1.2cm}|} \hline
-& EC2 & NEU & UF & All \\ \hline\hline
+\begin{tabular}[c]{|m{1.2cm}||m{1.3cm}|m{1.3cm}|m{1.3cm}|m{1.3cm}|} \hline
+& 50 - EC2 & 50 - NEU & 50 - UF & 50 - Each \\ \hline\hline
 Start & 2:44 & 10:21 & 20:23 & 21:14 \\ \hline
 Connect & 5:10 & 21:47 & 24:16 & 38:27\\ \hline
 Run & 7:15 & 6:35 & 5:53 & 21.19 \\ \hline
@@ -407,17 +407,15 @@ Run & 7:15 & 6:35 & 5:53 & 21.19 \\ \hline
 grid and run jobs from a client using the stack described by the paper.}
 \label{fig:results}
 \end{figure}
-\end{small}
 
 As the systems consist of various hardware and software configurations, the
 time to start is provided as a basis for the remaining numbers.  Some of the
-interesting experiences of the experiment were:  the combination of the
-``iptables'' and VMware NAT was more easily traversable than the EC2
-NAT or the combination of ``iptables'' and KVM NAT, as made explicit by the
-time to connect and the time to run; the VPN had some issues handling 150
-connections simultaneously, though over time connections for all sites were
-formed; and Condor has retry delays that affected results if the tasks
-were not accomplished immediately, well represented by the results for ``All''.
+interesting experiences of the experiment were:  1) the combination of the
+``iptables'' and VMware NAT was more easily traversable than the combination
+of ``iptables'' and KVM NAT and 2) in the experiment consisting of 150 peers,
+nodes were actually well connected much earlier, but due to missed packets and
+Condor timeouts, not all resources were accounted for in Condor as early as in
+the other tests.
 
 \section{Conclusion and Real Use Cases}
 \label{conclusion}
