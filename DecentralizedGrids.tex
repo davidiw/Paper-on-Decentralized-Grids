@@ -17,6 +17,11 @@
 \setlength{\topmargin}{0pt}
 \setlength{\topsep}{0pt}
 \setlength{\partopsep}{0pt}
+\setlength{\floatsep}{5pt}
+\setlength{\textfloatsep}{5pt}
+\setlength{\intextsep}{0pt}
+%\setlength{\abovecaptionskip}{0pt}
+%\setlength{\belowcaptionskip}{0pt}
 
 %\widowpenalty=100000
 %\clubpenalty=100000
@@ -67,37 +72,37 @@ uniformly having a common environment and network rules.  Administrators would
 prefer not having exceptional rules for a subset of resources under their
 domain and do not want to grant access to lesser known, remote users.  Network
 constraints such as firewalls and network address translation (NAT) can prevent
-cross domain communication.  Though this may be amerliorated by exceptions,
+cross-domain communication.  With exceptions this may be ameliorated, but
 additional rules may be required for each new cluster or resource added to the
-cross domain grid.
+cross-domain grid.
 
 HTC clusters are not limited to large systems requiring dedicated
-administrators, there are many systems that discuss the use of desktop or
-opportunistic grids, like Boinc~\cite{boinc} and PVC~\cite{pvc}.  While Boinc
+administrators: there are many systems that discuss the use of desktop or
+opportunistic grids, such as Boinc~\cite{boinc} and PVC~\cite{pvc}.  While Boinc
 solutions may be easily configured, the approach relies on a centralized
-scheduler and that Boinc applications be embarrassingly parallel.  While PVC
+scheduler and that applications be compiled using Boinc API.  While PVC
 provides enables parallel tasks and more decentralized system configuration,
 the approach has scalability concerns and relies on a centralized node to
-assist in node connectivity.  In general, there exist no solutions that
-provide scalable, self-configuring, decentralized grid systems for non-experts.
+assist in node connectivity.  In general, there exists no solution that
+provides scalable, self-configuring, decentralized grid systems for non-experts.
 
 Connecting resources distributed across the Internet can be challenging due to
 limit of IP (Internet Protocol) addresses available to an organization.  NAT
 further complicates the issue by limiting the formation of direct links between
 remote sites without external assistance.  When creating HTC systems across a
-small set of institutions approaches that use Internet Service Provider VPNs,
+small set of institutions, approaches that use Internet Service Provider VPNs,
 Layer 2 Tunneling Protocol (L2TP) VPNs, and other user-configured VPN
 approaches can be used.  Most solutions require some form of centralization
-and static links, as systems expand dynamically, the manual configuration of
+and static links; as systems expand dynamically, the manual configuration of
 the system grows significantly.  VPNs do, however, provide means of securing
 the system and, through the use of proper middleware, can allow users to
 interact with each others resources without additional configuration from the
 local site administrator.
 
-The Archer project~\cite{archer}, a collaborative academic environment,
-links institutions and external users for the purpose of computer achitecture
-research provides a real system having the described constraints.  Many
-researchers have a need for resources occassionally and rather than investing
+The Archer project~\cite{archer}, a collaborative academic environment
+linking institutions and external users for the purpose of computer architecture
+research, is an example of a real system having the described constraints.  Many
+researchers have a need for resources occasionally and rather than investing
 in a large pool of dedicated resources for a single institution they are able
 to pool their resources together using HTC mechanisms.  The resulting system
 allows individuals the opportunity to complete their jobs quickly and ensure
@@ -117,21 +122,21 @@ approach involving decentralized overlays enabling a self-configuring VPN
 and HTC environment.  
 
 In previous work, we bundled IPOP~\cite{ipop} for decentralized virtual
-networking and other grid essentials into a virtual machine called the
-Grid Appliance~\cite{grid_appliance}.  The approach was highly coupled and
+networking and other grid middleware into a virtual machine called the
+Grid Appliance~\cite{grid_appliance}.  The approach was highly coupled, and
 while it made it easy to connect to existing grids to add or access resources,
 it required expertise for users to create and manage their own independent
-grids.  This paper extends that work to enable non-users to create and manage
+grids.  This paper extends that work to enable non-experts to create and manage
 their own grids through a group-oriented model embodied in a web 2.0
 infrastructure providing a public key infrastructure along with VPN and grid
-configuration.  The approach describes methods that can be used by non-experts
+configuration.  The approach describes methods that can be used to easily
 to configure and combine resources from virtual, physical, and cloud
 environments.
 
 The rest of this paper is organized as follows.  Section~\ref{middleware}
 surveys core grid middleware, while Section~\ref{implementation} describes
 the methods by which we enable user-friendly creation and management of grids.
-A qualitative comparison of our system to other appraoches is presented in
+A qualitative comparison of our system to other approaches is presented in
 Section~\ref{related_work}.  We perform quantitative evaluations on our system
 and present our findings in Section~\ref{evaluation}.  Finally, in
 Section~\ref{conclusion}, we conclude with a discussion on real systems using
@@ -143,37 +148,32 @@ This section surveys existing grid middleware solutions presenting existing
 software solutions that address the constraints of our system.
 
 \subsection{Task Schedulers}
-The most fundamental requirement of a cluster is the task scheduler, each
+The most fundamental requirement of a cluster is the task scheduler.  Each
 task scheduler has a general focus and selecting one that works well in a
 specific environment can make the configuration of the system significantly
 easier.  Generally, there are three approaches to configure HTC clusters: 1)
 task workers pull from a centralized manager as employed by Boinc~\cite{boinc},
-2) task workers receive jobs from a centralized submission cite, and 3) task
+2) task workers receive jobs from a centralized submission site, and 3) task
 workers receive jobs from any member of the HTC infrastructure.  Both 2 and 3
 can be implemented using a myriad of different job schedulers with verifying
 levels of difficulty.  Task schedulers supporting this behavior include
-Condor~\cite{condor0}, Sun Grid Engine~\cite{grid_engine}, and PBS and its
-relative Torque~\cite{torque}.
+Condor~\cite{condor0}, Sun Grid Engine, and PBS and its relative Torque.
 
-By analyzing our first requirement, we quickly realized that by default none of
-the task schedulers, besides Condor, could support an environment that did not
-have a centralized user list.  While Condor does support similar behavior, it has
-separated the components that keep track of resources and negotiates resource
-allocation from those that make the resource requests and submit tasks.  This
-abstraction allows for a simple centralized system to maintain the grid without
-requiring any runtime configuration.  In addition, Condor allows open
-unauthenticated access to the grid as long as a peer is within a subnet, which
-is where a VPN comes into place ensuring that only members of the VPN have
-access to grid resources.  Note though that other task schedulers could
-potentially provide this feature through modification or additional middleware,
-like Globus~\cite{globus_toolkit}.  This amongst other reasons, such as it being
-free, having an active community, and focus on opportunistic cycles, led us to
-select Condor for our task scheduler.  In the list of requirements, Condor also
+Unlike other task schedulers, Condor supports decentralized users supported
+by having separate
+components that keep track of resources and negotiates resource allocation from
+those that make the resource requests and submit tasks.  This abstraction
+allows for a simple centralized system to maintain the grid without requiring
+any run-time configuration.  In addition, Condor allows open unauthenticated
+access to the grid as long as a peer is within a subnet, using a VPN ensures
+that that only members of the VPN have access to grid resources.  To enable this
+behavior in other grid schedulers would require modification or additional
+middleware, like Globus~\cite{globus_toolkit}.  Other reasons motivating the
+use of Condor include it being open source, having an active community, and
+focus on opportunistic cycles.  In the list of requirements, Condor also
 handles the ability to assign groups or institutions privilege on their own
-resources when shared in a collaborative environment.  Though in this
-selection, there still remains the issue of enabling multiple collaborative
-resource negotiators so that a single site going offline does not prevent new
-tasks from running on the grid.
+resources when shared in a collaborative environment.  Condor supports
+multiple, decentralized negotiators through flocking.
 
 %In full length paper compare other task schedulers...
 %Though settling on a task scheduler, we feel it is important to present a
@@ -187,53 +187,51 @@ tasks from running on the grid.
 %opinion, that it did not outweigh the ease of use provided by Condor.
 
 \subsection{P2P VPNs}
-Many of the requirements made for our system can be solved through the use of a
+Many of the requirements described can be addressed through the use of a
 VPN.  A VPN can assist in dealing with connecting network constrained resources,
 securing the grid from the outside world, and removing malicious forces inside.
 Grid computing has seen its fair share of VPNs such as ViNe~\cite{vine},
-Violin~\cite{violin}, and VNET~\cite{vnet}.  At issue with these approaches is
+Violin~\cite{violin}, and VNET~\cite{vnet}.  These approaches are limited by
 their lack of self-configuration, namely that static links between peers must
-be created and security credentials must be manually distributed.
-Additionally, none of the approaches support direct connectivity between NAT
-and firewalled peers without additional configuration from the user limiting
-their applicability for such resources to communicate with each other through
-proxy servers.  In PVC~\cite{pvc}, the authors describe an approach that
-self-configures through a centralized server with NAT traversal support, which
-works on approximately 60\% of NAT devices and only when used without a
-stateful firewalls.  The approach has drawbacks with respect to the
-requirements for this system: the use of a centralized key distribution
-center (KDC) and lack of encrypted links.
+be created, security credentials must be manually distributed, and lack of
+support for direct connectivity between NAT and firewalled peers without
+additional configuration from the user limiting their applicability for such
+resources to communicate with each other through proxy servers.  In
+PVC~\cite{pvc}, the authors describe an approach that self-configures through
+a centralized server with NAT traversal support, which works on many
+NAT devices but only when used without a stateful firewall.  The drawbacks with
+this approach are the centralized key distribution center (KDC) and lack of
+encrypted links.
 
 IPOP~\cite{ipop} provides a P2P virtual network with decentralized and
 self-configuring link creation with NAT traversal support that works with
-approximately 90\% of NATs using a distributed hash table (DHT) for address
-allocation and resolution.  Prevously, approaches~\cite{grid_appliance} used
-IPsec for security or went without it entirely as IPOP lacks the ability to
+most NATs using a distributed hash table (DHT) for address
+allocation and resolution.  Previous approaches~\cite{grid_appliance} used
+IPsec for security or went without it entirely as IPOP lacked the ability to
 secure links.  In~\cite{groupvpn}, we presented GroupVPN, which transforms IPOP
 into an automated VPN with enhanced NAT handling through the use of
-decentralized relays (proxies), enabling two hop, low latency connections when
+decentralized relays (proxies), enabling two-hop, low latency connections when
 NAT and firewall traversal fails.
 
-To implement authentication in the system, we employed a public key
-infrastructure (PKI), which we made accessible through a group based Web 2.0
-environment.  Users were able to create and join groups, and group owners are
-able allow users to join, promote users to administrative capabilities, or
-remove users who have overstayed their welcome.  A PKI has a very natural P2P
-aspect, in that, peers can mutually authenticate each other by verifying
-signatures on the exchanged certificates unlike the centralized authentication
-implemented in a KDC.  To automate this, users download a GroupVPN
-configuration file through the group website.  Upon configuring the GroupVPN
-with the configuration file through a command-line application, the GroupVPN
-will automatically obtain a signed certificate the next start.  To obtain the
-signed certificate, the GroupVPN sends a certificate request to the group
-server through HTTPS and provides a shared secret contained in the
-configuration file, this uniquely authenticates the user and if the user has
-been given permission, the server will sign the certificate request.  Removal
-of peers is performed in multiple ways, the simplest and most reliable is a
-user revocation list located at the group website, additionally, the system
-supports decentralized revocation a broadcast and distributed data stores.
+The authentication system employs a public key infrastructure (PKI), made
+accessible through a group-based Web 2.0 environment.  Users can create and
+join groups, and group owners can grant user access, promote users to
+administrative capabilities, or remove users who have overstayed their
+welcome.  A PKI has a very natural P2P aspect, in that, peers can mutually
+authenticate each other by verifying signatures on the exchanged certificates
+unlike the centralized authentication such as a KDC.  To automatically configure
+the system, users download a GroupVPN configuration file through the group
+website, which can be provided to the GroupVPN by command-line or GUI.  The
+next time GroupVPN is started, it will use this configuration to automatically
+obtain a signed certificate by sending a certificate request along with a
+shared secret contained in the configuration to the group server through HTTPS,
+uniquely authenticates the user.  If the user has appropriate permissions, the
+server will sign the certificate request.  To remove peers, the system supports
+a reliable, centralized user revocation list located at the group website and
+decentralized revocation by broadcast and distributed data stores.
 
 \section{Implementation and Design}
+\label{implementation}
 Middleware alone does not make a grid, the system must be configured for the
 components to work with each other.  This section discusses a solution to this
 issue using a group infrastructure to create and manage a grid with packaged
@@ -250,21 +248,21 @@ popular.  Recently, cloud computing has become popular in large part thanks to
 Amazon's EC2.  Both virtual and cloud resources present themselves as cheap
 computing for HTC and opportunistic computing purposes, because they can be
 setup in such a way as to have no or limited effect on users' computers and can
-be shutdown when no longer in use.  Though users have released both virtual and
-cloud appliances to tap into these resources, they still require configuration
-from the user so that they can connect with each other and to form a grid and
-the packaged solutions cannot easily be applied to hardware resources.
+be shutdown when no longer in use.  Even with virtual and cloud appliances 
+available to tap into these resources, they still require some manual
+manual configuration to form a grid, and these packaged solutions cannot easily
+be applied to hardware resources.
 
 Our solution is the creation of a generic software stack that self-configures
 based upon a user input configuration file.  The contents of a configuration
 file are the type of resource (dedicated compute node, job scheduling node, a
 mixture of the two, or the job negotiating central server); the user's group and
 username on the site; and the grid's GroupVPN configuration data.  The
-configuration file is generated from a Web 2.0 group based infrastructure
+configuration file is generated from a Web 2.0 group-based infrastructure
 called GroupAppliance, using a single GroupVPN group to connect all members of
 the grid together in a VPN but using the GroupAppliance group to distinguish
 their resource contributions.  Thus many GroupAppliances groups can be linked
-together through a GroupVPN group.  By distingushing resource contributions,
+together through a GroupVPN group.  By distinguishing resource contributions,
 users are able to get credit and gain priority to their resources when
 submitting tasks to run.
 
@@ -273,33 +271,32 @@ infrastructure, the data is stored in a floppy disk image that can be used on
 physical resources by writing the image to a real floppy disk or to a USB drive,
 a VM by adding a virtual disk image to the VM, and clouds through instance
 specific configuration data.  EC2 provides per-cloud instance configuration in a
-parameter they call ``user data'' that allows a user provide up to 16 KB of data
-that will be available only to that cloud instance.  At the time of this
-writing, it appears that EC2 is the only cloud provider to offer this option.
-Alternatively users could configure an image specifically to run for this
-cloud by inserting the floppy image into the cloud image and then generating
-cloud instances from this new image or the user could setup a storage cloud
-where the cloud instances could retrieve the floppy.  Because the floppy
-contains private GroupVPN configuration data it cannot be stored on public
-resources.
+parameter called ``user data'' providing up to 16 KB of data available only to
+that cloud instance.  At the time of this writing, it appears that EC2 is the
+only cloud provider to offer this option.  Alternatively, users could configure
+an image specifically to run for this cloud by inserting the floppy image into
+the cloud image and then generating cloud instances from this new image, or the
+user could setup a storage cloud where the cloud instances could retrieve the
+floppy.  Because the floppy contains private GroupVPN configuration data it
+should not stored on public resources.
 
 Upon booting, the grid configuration scripts parses the floppy to determine how
-the machine will self-configure.  Task schedulers will insert an ad into the
-DHT, whereas resources and task submitters query the DHT for the list of
-schedulers.  If there exists more than one scheduler, the resources and
-submitters will use Condor flocking to access the remaining resources.
+to configure the machine.  Negotiators insert an ad into the DHT, whereas
+resources and task submitters query the DHT for the list of negotiators,
+selecting one and relegating the rest for flocking.  At which point, tasks
+can be submitted and run.
 
 \subsection{Constructing Environments}
 Often VMs are favored for the distribution of complicated applications as
 experts can configure them and release the results as a complete working system.
-Though this prevents limits non-experts to the VM appliance, which may be
+This approach may limit non-expert use to the VM appliance, which may be
 undesirable for users that want to configure their own systems without reuse
-of the existing VM.  While guides may exist for the creation of systems, the
-systems are too complex for non-experts to digest and produce similar results.
-Alternatively, we have moved towards the use of packages (DEB and RPM) that can
-be installed in arbitrary environments and through the use of package managers
-(APT and YUM) handle configuration such that the requirements listed in the
-introduction are handled.  Packages can be provided that automatically
+of the existing VM.  Guides may exist for the creation of systems, most
+systems are too complex for non-experts to produce similar results found in the
+VM.  Alternatively, we have moved towards the use of packages (DEB and RPM)
+that can be installed in arbitrary environments and through the use of package
+managers (APT and YUM) handle configuration such that the requirements listed
+in the introduction are handled.  Packages can be provided that automatically
 install and configure the task scheduling middleware and a VPN as well as
 sandbox the environment limiting users to accessing the virtual network and not
 external resources such as other local resources and the Internet.  The
@@ -307,20 +304,21 @@ remaining components are configurable through the GroupAppliances interface and
 decentralized through the DHT.
 
 The most important components in securing an environment are limiting internal
-and external access from inside the system.  Specifically, interal resources
+and external access from inside the system.  Specifically, internal resources
 should avoid password enabled accounts to avoid cases where users submit tasks
-that attempt to provide more priviledged access to the user.  In the event that
+that attempt to provide more privileged access to the user.  In the event that
 this is not possible, ensuring that the task scheduler runs as user without
 the ability to switch permissions can prevent this attack, for example,
 preventing \textit{su} access in Linux.  By default, Condor will run jobs as
 either nobody or the user named ``Condor''.  This limits access to many of the
 core components of the system already, but it does not limit the users ability
 to read files that allow reading from anyone on the system and the ability to
-communicate to external resources from inside the machine.  To prevent reading
-personal data, simply making the user data directory readable by the user and
-group who own the files and directories and not by others.  By configuring the
-firewall to only allow the Condor user to only have the ability to send packets
-over the virtual network device.
+communicate to external resources from inside the machine.  Making the user
+data directory readable only by the user and group who own the files and
+directories will prevent remote users from reading local user personal data.
+Limiting access to external resources can be implemented via a firewall,
+allowing the Condor user to only have the ability to send packets over the
+virtual network.
 
 For job submission nodes, there is one more consideration, we attempt to make
 these as user-friendly as possible.  To do this, we have enabled file system
@@ -329,14 +327,14 @@ host can access the resources without having to configure additional utilities
 or using the VMs interface, if available.  Though, we do not want users to
 access the data through the virtual network or the Internet from a public
 address, with regard to virtual machines, we create a second network card that
-supports host only connectivity.  By binding all user applications to use the
+supports host-only connectivity.  By binding all user applications to use the
 network interface, they do not require extra security enhancements.
 Alternatively, applications like SSH could be enabled to only allow private key
 based login.  In our model, we expect only dedicated compute nodes and possibly
 the job negotiator running on physical or cloud resources and user nodes to
 use VMs.
 
-To prepare a system is straight-forward, users configure the package manager to
+To prepare a system is straight-forward: users configure the package manager to
 link to a package distribution site and then install the desired packages for
 the grid resource.  When finished, the user can restart the device or restart
 the grid service with the floppy image adding a new resource to the grid.  The
@@ -365,7 +363,7 @@ completely decentralized computing grid.  The authors state that the expected
 size for grids range from 5 to 15 nodes.  While the authors do not mention NAT
 traversal, there are many Gnutella systems that do support various forms of it.
 There is no mention of providing safety to the users' resources from malicious
-tasks.  While GPU provides easy configurability, it lacks the ability to run
+tasks.  While GPU provides easy configuration, it lacks the ability to run
 jobs in a sandbox and support large pools of resources.
 
 There are many other desktop grid environments that use Boinc as the underlying
@@ -380,30 +378,46 @@ This evaluation focuses on the time required to create and utilize a grid
 consisting of various distributed resources built a reference implementation of
 the system described in this paper.  Using VMware resources behind a Cisco
 and ``iptables'' NAT at the University of Florida, KVM resources behind an
-``iptables'' NAT at Northeastern University, and Cloud resources provided by
-EC2, pools of 50 resources from each site were booted independently and then in
-parallel.  The resource connected with an existing GroupVPN and GroupAppliance
-group with a negotiator and client node already online.  Upon all the resources
-connecting, the client submits a job to all resource.  Time for the machines to
-connect starts when the resources begin their deployment (copying of files and
-starting the VMs) and finishes when all of the deployed resources appear in
-``condor\_status''.  Time for connectivity begins when a client client submits
-a job to sleep for 5 minutes to every resource and all tasks have completed.
-Results are presented in Figure~\ref{fig:results}.
+``iptables'' and KVM NAT at Northeastern University, and Cloud resources
+provided by EC2, pools of 50 resources from each site were booted independently
+and then in parallel.  The resources connected with an existing GroupVPN and
+GroupAppliance group with a negotiator and client node already online.  Upon
+all the resources connecting, the client submits a job to all resources.  The
+time required to deploy the resources starts with the beginning of copying
+files and ends when the last VM has been started.  Time for the machines to
+connect includes this time up until the time when all of the deployed resources
+appear in ``condor\_status''.  Time for connectivity begins when a client
+client submits a job to sleep for 5 minutes to every resource and all tasks
+have completed.  All tasks are automated through scripts with human interaction
+required only to start the events of grid boot and job submission.  Results are
+presented in Figure~\ref{fig:results}.
 
-\begin{table}[h]
+\begin{small}
+\begin{figure}[ht]
 \setlength{\itemsep}{0pt}
 \setlength{\parskip}{0pt}
 \centering
 \begin{tabular}[c]{|m{1.5cm}||m{1.2cm}|m{1.2cm}|m{1.2cm}|m{1.2cm}|} \hline
 & EC2 & NEU & UF & All \\ \hline\hline
-Start & 0 & 0 & 0 & 0\\ \hline
-Connect & 0 & 0 & 0 & 0\\ \hline
+Start & 2:44 & 10:21 & 20:23 & 21:14 \\ \hline
+Connect & 5:10 & 21:47 & 24:16 & 38:27\\ \hline
+Run & 7:15 & 6:35 & 5:53 & 21.19 \\ \hline
 \end{tabular}
-\caption{Time in seconds required to start and connect to various grid
-deployments using the stack described by the paper.}
-\label{fig:cbc_issue}
-\end{table}
+\caption{Time in seconds to start and connect resources to an existing
+grid and run jobs from a client using the stack described by the paper.}
+\label{fig:results}
+\end{figure}
+\end{small}
+
+As the systems consist of various hardware and software configurations, the
+time to start is provided as a basis for the remaining numbers.  Some of the
+interesting experiences of the experiment were:  the combination of the
+``iptables'' and VMware NAT was more easily traversable than the EC2
+NAT or the combination of ``iptables'' and KVM NAT, as made explicit by the
+time to connect and the time to run; the VPN had some issues handling 150
+connections simultaneously, though over time connections for all sites were
+formed; and Condor has retry delays that affected results if the tasks
+were not accomplished immediately, well represented by the results for ``All''.
 
 \section{Conclusion and Real Use Cases}
 \label{conclusion}
@@ -413,15 +427,18 @@ Web 2.0 group-based infrastructure providing configuration for both the grid
 and the VPN.  The VPN provides a completely decentralized system having no
 single point of failure.  Grid resources are pre-configured with only identity
 and discover each other through the VPN's DHT.  Users never need to access a
-console to create a HTC cluster, an attractive feature for non-experts.
+console to create a HTC cluster, an attractive feature for non-experts.  The
+evaluation establishes this process as a valid method for connecting distributed
+resources in a scalable fashion, but in larger systems, administrators may need
+to be patient for all resources to appear.
 
 We have several deployments using the system described in this paper.  Over
 the past 2 years, we have had an active grid deployed for computer architecture
 research, Archer~\cite{archer}.  Archer currently spans four universities with
 500 resources, we have had hundreds of students and researchers submitting jobs
 with over 150,000 hours of total job execution in the past year alone.  Groups
-at the Universities of Florida, Clemson, Arkansas, and Northern Switzerland have
-used it as a tool to teach grid computing.  Purdue is constructing a large
+at the Universities of Florida, Clemson, Arkansas, and Northwestern Switzerland
+have used it as a tool to teach grid computing.  Purdue is constructing a large
 campus grid using GroupVPN to connect resources together.  Recently, a grid at
 La Jolla Institute for Allergy and Immunology went live with minimal
 communication with us.
