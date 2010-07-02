@@ -1,8 +1,4 @@
-\documentclass[workingdraft,endnotes]{usetex-v1}
-
-\usepackage{outlines}
-\usepackage{natbib}
-\setlength{\bibsep}{0.0pt}
+\documentclass[conference]{IEEEtran}
 
 \usepackage{url}
 \usepackage{multirow}
@@ -19,19 +15,20 @@
 \title{Grid Appliance -- On the Design of Self-Organizing,
 Decentralized Grids}
 
-\docstatus{Submitted to LISA'10}
-
 \author{
-\authname{David Wolinsky and Renato Figueiredo}
-\authaddr{Advanced Computing and Information Systems Laboratory}
-\authaddr{University of Florida}
-\authurl{\url{[davidiw,renato]@acis.ufl.edu}}
-\small{\bf Keywords: grid computing, cloud computing, virtual private networks,
-P2P computing, peer-to-peer}
+\IEEEauthorblockA{
+  David Isaac Wolinsky,
+  Renato Figueiredo
+}
+\IEEEauthorblockN{
+  University of Florida
+}
 }
 
 \maketitle
 
+
+\begin{abstract}
 
 ``Give a man a fish, feed him for a day.  Teach a man to fish, feed him for a
 lifetime'' -- Lau Tzu
@@ -53,6 +50,22 @@ scale computing grids.  The paper details the design of the Grid Appliance and
 reports on experiences and lessons learned over four years of development and
 deployment of wide-area Grid appliance pools.
 
+\end{abstract}
+
+\section{Introduction}
+
+Grid computing presents opportunities to combine various scale, distributed
+systems together to form powerful computing systems.  Due to the challenges in
+coordinating the organization of grids, researchers typically become members of
+existing grids or inefficiently use their own local resources, such as
+coordinating with other members of the lab access to the various systems.
+While there is a wealth of grid software available, most researchers see the
+entry barrier to installing and management of the system as being greater than
+the usefulness of the application.  Succinctly defined, the problem we address
+in this paper is how to introduce complex grid middleware to users, such that
+they can focus on making use of the software and not the setup and managerment
+of the systems thereafter.
+
 Our approach begins with a P2P infrastructure enabling peers to discover each
 other and coordinate the organization of a grid.  We use a P2P system based
 upon a distribute hash table (DHT), which enables peers to efficiently query
@@ -60,14 +73,15 @@ the system with a key and discover one or more values that map to that key.  We
 also layer on top of the P2P overlay a virtual private network (VPN), which
 provides all-to-all connectivity and transparently handles configuration and
 organization through the DHT.  The grid middleware can use either the DHT or
-the VPN to bootstrap various grid middleware stacks, such as Condor, Hadoop,
-MPICH, or PBS (Torque).  The entire system has been packaged into a repository
-to automatically configure physical, virtual, and even cloud resources.  The
-resulting ``Grid Appliance'' is a preconfigured environment emphasizing trivial
-installation, enabling user interaction with the system to focus on the tools
-provided and not configuration details, providing researchers with a
-plug-and-play tool to create ad-hoc virtual compute clusters for their own
-groups, local or federated.
+the VPN to bootstrap various grid middleware stacks, such as
+Condor~\cite{condor}, Torque (PBS)~\cite{torque}, Sun Grid Engine~\cite{sge},
+MPICH~\cite{mpich}, or Hadoop~\cite{hadoop}.  The entire system has been
+packaged into a repository to automatically configure physical, virtual, and
+even cloud resources.  The resulting ``Grid Appliance'' is a preconfigured
+environment emphasizing trivial installation, enabling user interaction with
+the system to focus on the tools provided and not configuration details,
+providing researchers with a plug-and-play tool to create ad-hoc virtual
+compute clusters for their own groups, local or federated.
 
 To justify our techniques, consider the difficulty in combining resources
 across disparate networks, which may or may not involve multiple research
@@ -204,54 +218,7 @@ public Grid appliance pool in a matter of minutes by simply downloading and
 booting a plug-and-play VM image that is portable across VMware, VirtualBox,
 and KVM.
 
-\bibliographystyle{abbrv}
-\small{
+\bibliographystyle{IEEEtran}
 \bibliography{DecentralizedGrids}
-\suppressfloats
-}
-
-\vspace{5 mm}\large{\bf Outline}
-\normalsize{
-\begin{outline}
-  \1 Introduction
-    \2 Background / motivation
-    \2 Related work
-  \1 Choosing a Grid Middleware, comparing:
-    \2 Condor
-    \2 PBS (Torque)
-    \2 Sun Grid Engine
-    \2 State of the art BonjourGrid, etc
-  \1 Connecting the Grid, VPNs
-    \2 Need for VPNs
-      \3 LAN / Multicast
-      \3 NATs / firewalls
-      \3 IPv4 Address space
-    \2 P2P VPN 
-      \3 Bootstrapping
-      \3 Organization
-  \1 Constructing an individual resource
-    \2 Packaging
-      \3 Virtual Appliances
-      \3 Cloud Instances
-      \3 Physical resources (generic deployment)
-    \2 Making it easy for users to extend and redistribute
-    \2 Security considerations
-  \1 Constructing the Grid
-    \2 Organizing Grids
-      \3 DHT approach
-      \3 IP Multicast
-    \2 Designing and interacting with a collaborative website
-  \1 Evaluation
-    \2 User feedback
-      \3 Surveys
-      \3 Correspondence with remote deployments
-      \3 Use in courses
-    \2 Deployment across clouds
-    \2 Bootstrapping local independent pools
-  \1 Conclusions
-    \2 Overview of how our approach addresses challenges
-    \2 Future work
-\end{outline}
-}
 
 \end{document}
