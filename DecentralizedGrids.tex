@@ -36,20 +36,19 @@ lifetime'' -- Lau Tzu
 
 Grid computing projects such as TeraGrid~\cite{teragrid},
 Grid'5000~\cite{grid_5000}, and OpenScience Grid~\cite{osg} enable researchers
-to access vast amounts of compute resources, but in doing so, force researchers
-to adapt their workloads to the environments provided by these systems.  This
-does not leave many alternatives for researchers as creating these types of
-systems requires coordination and expertise in networking, operating systems,
-security, and grid middleware.  This results in many research groups creating
-small, in-house compute clusters where scheduling is often ad-hoc (and resource
-utilization is low), and aggregation of resources across multiple groups is
-hindered by the complexities in constructing federated systems.  This paper
-describes the ``Grid Appliance'', the first system of its kind that enables
-researchers to efficiently deploy their own compute clusters, and to seamlessly
-extend their systems across network domains to create small to large scale
-computing grids.  The paper details the design of the Grid Appliance and
-reports on experiences and lessons learned over four years of development and
-deployment of wide-area Grid appliance pools.
+to access vast amounts of compute resources, but in doing so, require
+researchers to adapt their workloads to the environments provided by these
+systems.  Researchers do not have many alternatives as creating these types of
+systems involve coordination of distributed systems and expertise in
+networking, operating systems, security, and grid middleware.  This results in
+many research groups creating small, in-house compute clusters where scheduling
+is often ad-hoc with low resource utilization.  To address these challenges we
+present the ``Grid Appliance.''  The ``Grid Appliance'' enables researchers to
+efficiently deploy and extend their systems both locally and across network
+domains for both small and large scale computing grids.  The paper details the
+design of the Grid Appliance and reports on experiences and lessons learned
+over four years of development and deployment of wide-area Grid appliance
+pools.
 
 \end{abstract}
 
@@ -65,10 +64,10 @@ Condor~\cite{condor0}, Torque (PBS)~\cite{torque}, and Sun Grid
 Engine~\cite{grid_engine} and parallelization tools like MPICH~\cite{mpich},
 Hadoop~\cite{hadoop}, and UPC~\cite{upc}, most researchers see the entry
 barrier to installing and management of the system as being greater than the
-usefulness of the application.  Succinctly defined, the problem we address in
-this paper is how to introduce complex grid middleware to users, such that they
-can focus on making use of the software and not the setup and management of the
-systems thereafter.
+usefulness of the application.  Succinctly defined, we address the problem of
+how to introduce complex grid middleware to users, such that they can focus on
+making use of the software and not the setup and management of the systems
+thereafter.
 
 Our approach begins with a P2P infrastructure enabling peers to discover each
 other coordinating the organization of a grid. This is performed through a
@@ -77,27 +76,28 @@ peers to efficiently query the system with a key and receive potentially
 multiple values.  To address wide area connectivity and network dynamics, we
 use a virtual private network, guaranteeing all-to-all connectivity while
 transparently handling configuration and organization through the DHT.  To
-avoid manual configuration of grid middleware, we have devised means to do
-perform it automatically through the DHT as well as IP multicast.  The entire
-system has been packaged into a repository to automatically configure physical,
-virtual, and even cloud resources.  The resulting ``Grid Appliance'' is a
-preconfigured environment emphasizing trivial installation, enabling user
-interaction with the system to focus on the tools provided and not
+avoid manual configuration of grid middleware, we have devised means to
+self-configuration through the DHT as well as IP multicast.  The entire system
+has been packaged into a software repository enabling automatic configuration
+of physical, virtual, and even cloud resources.  The resulting ``Grid
+Appliance'' is a preconfigured environment emphasizing trivial installation.
+User interaction with the system is focused on the tools provided and not
 configuration details, providing researchers with a plug-and-play tool to
 create ad-hoc virtual compute clusters for their own groups, local or
 federated.  
 
 To allow user-friendly access to these feature, we have implemented a web
 interface called ``Group Appliances.''  At this site, users may create or join
-a group, similar to an online social networking group.  As member of the group,
-users can download a configuration file, used to configure the ``Grid
-Appliance'' and uniquely identify the user and group.  As an administrator,
-users can allow users to join or remove misbehaving users.  Once a user has
+a group, similar to an online social networking group.  As a member of the
+group, users can download a configuration file, which is used to configure the
+``Grid Appliance'' and uniquely identify the user and group.  Administrators of
+the group can allow users to join or remove misbehaving users.  Once a user has
 obtained a configuration file, it can be added to the ``Grid Appliance'' as a
-floppy disk.  Upon the first boot, it will contact the ``Group Appliances''
-site to obtain a certificate authority (CA) signed certificate and then connect
-to other systems through the P2P overlay.  Afterward, the system is completely
-decentralized, relying on the P2P infrastructure for coordination.
+floppy disk or into the file system.  Upon the first boot, it will contact the
+``Group Appliances'' site to obtain a certificate authority (CA) signed
+certificate and then connect to other systems through the P2P overlay.
+Afterward, the system is completely decentralized, relying on the P2P
+infrastructure for coordination.
 
 To justify our techniques, consider the difficulty in combining resources
 across disparate networks, which may or may not involve multiple research
@@ -112,8 +112,7 @@ each new cluster or resource added internally and externally, quickly becoming
 unmanageable.  Whereas in our approach, users can have a distributed system
 running by creating a group in a ``Group Appliances'' site, downloading the
 configuration image and a ``Grid Appliance,'' and starting the ``Grid
-Appliance,'' actions that require familiarity with online social networks, file
-extraction, and run a virtual machine (VM).
+Appliance'' virtual machine (VM).
 
 The rest of this paper discusses these challenges in more depth and the
 solutions, we have developed, to address them.  In Section~\ref{middleware}, we
@@ -160,8 +159,8 @@ automatically query this key and configure to report to one or more managers,
 application dependent.  Likewise, managers can query this key and then
 coordinate with each other management of the overlay.
 
-Of the resource management middlewares that we have surveyed, we found Condor
-the most appealing for its decentralized properties and focus on desktop grids.
+Of the resource management middlewares that we have surveyed, Condor was the
+most appealing due to its decentralized properties and focus on desktop grids.
 These are easily recognizable by analyzing the complexity involved in having
 multiple submission sites and the ability to add and remove resources.
 
@@ -169,19 +168,19 @@ Typical clusters usually have a single entry point for task submission, SGE and
 Torque make it rather difficult to support more than one, usually requiring
 additional middleware, such as Globus~\cite{globus}, to support this behavior.
 A single submission site may be very undesirable and difficult to support, if
-multiple groups are collaborating together to form a single grid.  To multiple
-submission sites, Condor separates job queues / submission sites from resource
-management and so that two entities work together to negotiate the running jobs
-on resources.  The job queue or submission machine is run by the user and
-stores everything pertinent to the user, while the resource manager runs
-independently with Condor handling all the interation between it and the job
-queue.
+multiple groups are collaborating together to form a single grid.  To allow for
+multiple submission sites, Condor separates job queues / submission sites from
+resource management and so that two entities work together to negotiate the
+running jobs on resources.  In our system, job queue or submission machine,
+which stores everything pertinent to the user, is run by the user, while the
+resource manager runs independently with Condor handling all the interation
+between it and the job queue.
 
 To add new resources to a Condor system, an execute or submission node must
-only contact the manager, the organization of the system is performed entirely
-transparent to the user.  However, in SGE and Torque, after resources have been
-added into the system, the user must manually configure the manager to control
-them.
+have an IP address for the manager, the rest of the system organization is
+performed entirely transparent to the user.  However, in SGE and Torque, after
+resources have been added into the system, the user must manually configure the
+manager to control them.
 
 One of the caveats of our approach, which remains ongoing research, is the
 requirement of a manager, which means we do not provide a completely
@@ -271,17 +270,18 @@ allocated one IP address, yet all grid resources are able to communicate with
 each other.
 
 Our work relies on a group enabled IPOP VPN called GroupVPN~\cite{groupvpn}.
-IPOP and its underlying P2P infrastructure support NAT traversal allowing for
-peers behind NATs to communicate directly with each other in addition
-indirectly by relaying across the P2P system.  Many of the key features of our
-grid system are enabled because of the VPN.  For example, if there were not a
-VPN, users of MPI and Hadoop would need to ensure that all resources were
-bridged to the LAN and not through a VM NAT, the typical configuration.  The
-VPN software supports the ability to self-organize using existing
-infrastructures including IP multicast, public overlays, and Xmpp as described
-in our previous work~\cite{p2p10}.  This is in contrast to other VPNs that are
-either centralized and require a dedicated node to coordinate peers and
-decentralized solutions that require manual configuration of links between
+IPOP through its underlying P2P infrastructure support NAT traversal allowing
+for peers behind NATs to communicate directly with each other in addition to
+indirectly communicating by relaying across the P2P system.  Many of the key
+features of our grid system are enabled because of the VPN.  For example, if
+there were not a VPN, users of MPI and Hadoop would need to ensure that all
+resources were bridged to the LAN and not through a VM NAT, the typical
+configuration, otherwise the multicast message would not be delivered to all
+participants.  The VPN software supports the ability to self-organize using
+existing infrastructures including IP multicast, public overlays, and Xmpp as
+described in our previous work~\cite{p2p10}.  This is in contrast to other VPNs
+that are either centralized and require a dedicated node to coordinate peers
+and decentralized solutions that require manual configuration of links between
 peers.
 
 \begin{figure*}[ht]
@@ -292,8 +292,8 @@ starting the appliance, and connecting with a resource manager.}
 \label{fig:system}
 \end{figure*}
 
-Using these techniques ``Grid Appliance'' systems can be constructed in one of
-two ways: local and wide area.  The ``Grid Appliance'' ships with two default
+Using these techniques ``Grid Appliances'' can be constructed in one of two
+ways: local and wide area.  The ``Grid Appliance'' ships with two default
 configurations, one that connects users to a globally available public system
 and another that allows for LAN only grids.  Local grids can be constructed by
 booting the appliances, which will then use multicast self-discovery to find
@@ -301,13 +301,13 @@ other resources, create the DHT overlay, and then form VPN links.
 Alternatively, the user can connect to the default publc system or use ``Group
 Appliances'' to create and manage their own grid, both of which bootstrap from
 a public shared DHT overlay.  This does not prohibit more advanced users from
-downloading our ``Group Appliances,'' as its available as a virtual machine,
-and host their own DHT overlay.
+downloading our ``Group Appliances,'' as its available as a VM, and host their
+own DHT overlay.
 
 \section{Deploying Grid Appliances}
 \label{system}
 
-The complete system, as presented in Figure~\ref{fig:system}, users join a
+The complete system is presented in Figure~\ref{fig:system}.  Users join a
 group and can then download one of three different types of configurations:
 server, worker, and client (mapping to the three types of typical grid nodes,
 resource manager, execution site, and submission site).  In addition to the
@@ -371,7 +371,7 @@ Figure~\ref{fig:results}.
 \setlength{\itemsep}{0pt}
 \setlength{\parskip}{0pt}
 \centering
-\begin{tabular}[c]{|m{1.0cm}||m{1.2cm}|m{1.2cm}|m{1.2cm}|m{1.2cm}|} \hline
+\begin{tabular}[c]{|m{1.0cm}||m{1.2cm}|m{1.3cm}|m{1.2cm}|m{1.2cm}|} \hline
 & 50 - EC2 & 50 - NEU & 50 - UF & 150 - All \\ \hline\hline
 Start & 2:44 & 10:21 & 20:23 & 21:14 \\ \hline
 Connect & 2:27 & 11:36 & 3:53 & 17:13\\ \hline
