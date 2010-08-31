@@ -35,20 +35,20 @@ Decentralized Grids}
 lifetime'' -- Lau Tzu
 
 Grid computing projects such as TeraGrid~\cite{teragrid},
-Grid'5000~\cite{grid_5000}, and OpenScience Grid~\cite{osg} enable researchers
-to access vast amounts of compute resources, but in doing so, require
-researchers to adapt their workloads to the environments provided by these
-systems.  Researchers do not have many alternatives as creating these types of
-systems involve coordination of distributed systems and expertise in
-networking, operating systems, security, and grid middleware.  This results in
-many research groups creating small, in-house compute clusters where scheduling
-is often ad-hoc with low resource utilization.  To address these challenges we
-present the ``Grid Appliance.''  The ``Grid Appliance'' enables researchers to
-efficiently deploy and extend their systems both locally and across network
-domains for both small and large scale computing grids.  The paper details the
-design of the Grid Appliance and reports on experiences and lessons learned
-over four years of development and deployment of wide-area Grid appliance
-pools.
+Grid'5000~\cite{grid_5000}, and OpenScience Grid~\cite{osg} provide researchers
+access to vast amounts of compute resources, but in doing so, require the
+adaption of their workloads to the environments provided by these systems.
+Researchers do not have many alternatives as creating these types of systems
+involve coordination of distributed systems and expertise in networking,
+operating systems, security, and grid middleware.  This results in many
+research groups creating small, in-house compute clusters where scheduling is
+often ad-hoc, thus limiting effective resource utilization.  To address these
+challenges we present the ``Grid Appliance.''  The ``Grid Appliance'' enables
+researchers to seamlessly deploy, extend, and share their systems both locally
+and across network domains for both small and large scale computing grids.
+This paper details the design of the Grid Appliance and reports on experiences
+and lessons learned over four years of development and deployment involving
+wide-area grids.
 
 \end{abstract}
 
@@ -57,47 +57,46 @@ pools.
 Grid computing presents opportunities to combine various scale, distributed
 resources together to form powerful computing systems.  Due to the challenges
 in coordinating the organization of grids, researchers typically become members
-of existing grids or otherwise often inefficiently managing their local
-resources, typically resource discovery and allocation by word of mouth.  While
-there is a wealth of grid middleware available, such as resource managers like
+of existing grids or often times inefficently manage their local resources,
+such as resource discovery and allocation by word of mouth.  While there is a
+wealth of grid middleware available, including resource managers like
 Condor~\cite{condor0}, Torque (PBS)~\cite{torque}, and Sun Grid
 Engine~\cite{grid_engine} and parallelization tools like MPICH~\cite{mpich},
 Hadoop~\cite{hadoop}, and UPC~\cite{upc}, most researchers see the entry
-barrier to installing and management of the system as being greater than the
-usefulness of the application.  Succinctly defined, we address the problem of
-how to introduce complex grid middleware to users, such that they can focus on
-making use of the software and not the setup and management of the systems
-thereafter.
+barrier to installing and future management of the system as being greater than
+their usefulness.  To address these concerns, we have implemented the ``Grid
+Appliance'' allowing users to focus on making use of the grid and not the setup
+and management of the underlying components.
 
-Our approach begins with a P2P infrastructure enabling peers to discover each
-other coordinating the organization of a grid. This is performed through a
-distribute hash table (DHT) built on top of our P2P system.  A DHT enables
-peers to efficiently query the system with a key and receive potentially
-multiple values.  To address wide area connectivity and network dynamics, we
-use a virtual private network, guaranteeing all-to-all connectivity while
-transparently handling configuration and organization through the DHT.  To
-avoid manual configuration of grid middleware, we have devised means to
-self-configuration through the DHT as well as IP multicast.  The entire system
-has been packaged into a software repository enabling automatic configuration
-of physical, virtual, and even cloud resources.  The resulting ``Grid
-Appliance'' is a preconfigured environment emphasizing trivial installation.
-User interaction with the system is focused on the tools provided and not
-configuration details, providing researchers with a plug-and-play tool to
+At the heart of our approach lies a P2P infrastructure enabling decentralized
+peer discovery thus coordinating the organization of a grid.  The chosen P2P
+infrastructure is based upon distributed hash tables (DHTs) enabling peers to
+efficiently query the system with a key and potentially receive multiple values
+without complex searching algorithms.  To address wide area connectivity and
+network dynamics, we employ a virtual private network (VPN), guaranteeing
+all-to-all connectivity while transparently handling configuration and
+organization through the DHT.  Grid configuration happens automatically through
+web interface configuration files and node interaction through the DHT or VPN
+based IP multicast.  The entire system has been packaged into a software
+repository enabling automatic configuration of physical, virtual, and even
+cloud resources.  This results in the ``Grid Appliance'', a preconfigured
+environment emphasizing user-centricity and trivial installation.  This
+approach focuses user interaction with the system on their tasks rather than
+the configuration details, providing researchers with a plug-and-play tool to
 create ad-hoc virtual compute clusters for their own groups, local or
 federated.  
 
-To allow user-friendly access to these feature, we have implemented a web
-interface called ``Group Appliances.''  At this site, users may create or join
-a group, similar to an online social networking group.  As a member of the
-group, users can download a configuration file, which is used to configure the
-``Grid Appliance'' and uniquely identify the user and group.  Administrators of
-the group can allow users to join or remove misbehaving users.  Once a user has
-obtained a configuration file, it can be added to the ``Grid Appliance'' as a
-floppy disk or into the file system.  Upon the first boot, it will contact the
-``Group Appliances'' site to obtain a certificate authority (CA) signed
-certificate and then connect to other systems through the P2P overlay.
-Afterward, the system is completely decentralized, relying on the P2P
-infrastructure for coordination.
+The web interface used to create the appliance configuration is called ``Group
+Appliances.'' At this site, users create or join groups, similar to an online
+social networking group.  Administrators of the group have the abilities to
+accept or deny user access and remove misbehaving users.  All members of the
+group have the ability to create and download configuration files, which plug
+into the ``Grid Appliance'' as a floppy disk or as a file in its file system.
+The file specifies the type and purpose of the ``Grid Appliance'' instance and
+uniquely identifies the owner.  Upon first boot, an appliance instance contacts
+the ``Group Appliances'' site specified in the configuration file to obtain a
+certificate authority (CA) signed certificate, after which the system becomes
+completely decentralized and connects to other systems through the P2P overlay.  
 
 To justify our techniques, consider the difficulty in combining resources
 across disparate networks, which may or may not involve multiple research
@@ -109,17 +108,18 @@ address translators (NATs) and firewalls, preventing direct communication with
 each other.  Even assuming that an institution's network administrator is
 willing to make exceptions for the grid, additional rules may be required for
 each new cluster or resource added internally and externally, quickly becoming
-unmanageable.  Whereas in our approach, users can have a distributed system
-running by creating a group in a ``Group Appliances'' site, downloading the
-configuration image and a ``Grid Appliance,'' and starting the ``Grid
-Appliance'' virtual machine (VM).
+unmanageable.  Our system embraces these concerns, we assume a completely
+decentralized system with many if not all resources behind NATs, that users may
+be unfamiliar with networking considerations and managing grid organization;
+but the system still works well when used inside a LAN controlled by
+experienced IT workers.
 
-The rest of this paper discusses these challenges in more depth and the
-solutions, we have developed, to address them.  In Section~\ref{middleware}, we
-discuss various types of middleware and techniques used to support
-self-configuration.  Section~\ref{vpns} reflects on the difficulties presented
-by distributed systems and how only a small subset of VPNs can provide a
-satisfactory solution.  The entire architecture of the system is presented in
+The rest of this paper discusses these challenges in more depth and our
+solutions addressing them.  In Section~\ref{middleware}, we discuss various
+types of middleware and techniques used to support self-configuration.
+Section~\ref{vpns} reflects on the difficulties presented by distributed
+systems and how only a small subset of VPNs can provide a satisfactory
+solution.  The entire architecture of the system is presented in
 Section~\ref{system}.  Finally, Section~\ref{related_work} compares and
 contrasts other solutions to these problems.
 
@@ -164,16 +164,16 @@ most appealing due to its decentralized properties and focus on desktop grids.
 These are easily recognizable by analyzing the complexity involved in having
 multiple submission sites and the ability to add and remove resources.
 
-Typical clusters usually have a single entry point for task submission, SGE and
-Torque make it rather difficult to support more than one, usually requiring
-additional middleware, such as Globus~\cite{globus}, to support this behavior.
-A single submission site may be very undesirable and difficult to support, if
-multiple groups are collaborating together to form a single grid.  To allow for
+Typical clusters have a single entry point for task submission, SGE and Torque
+make it rather difficult to support more than one, usually requiring additional
+middleware, such as Globus~\cite{globus}, to support this behavior.  If
+multiple groups are collaborating together to form a single grid, a single
+submission site may be very undesirable and difficult to support.  To allow for
 multiple submission sites, Condor separates job queues / submission sites from
 resource management and so that two entities work together to negotiate the
 running jobs on resources.  In our system, job queue or submission machine,
 which stores everything pertinent to the user, is run by the user, while the
-resource manager runs independently with Condor handling all the interation
+resource manager runs independently with Condor handling all the interaction
 between it and the job queue.
 
 To add new resources to a Condor system, an execute or submission node must
@@ -184,7 +184,7 @@ manager to control them.
 
 One of the caveats of our approach, which remains ongoing research, is the
 requirement of a manager, which means we do not provide a completely
-decentralized, but rather a distribute approach.  In the meantime, we have
+decentralized, but rather a distributed approach.  In the meantime, we have
 taken advantage of a feature known as ``flocking'' in Condor.  Flocking allows
 submission sites to connect to multiple managers.  This serves two purposes: 1)
 to provide transparent reliability by supporting multiple managers and 2) users
@@ -326,24 +326,23 @@ middleware (e.g. Condor flocking).  Beyond the downloading of the appliance and
 the configuration data, all other steps are performed transparently from the
 user.
 
-Often VMs are favored for the distribution of complicated applications as
-experts can configure them and release the results as a complete working
-system.  This approach may limit non-expert use to the VM appliance, which may
-be undesirable for users that want to configure their own systems without reuse
-of the existing VM.  Guides may exist for the creation of systems, most systems
-are too complex for non-experts to produce similar results found in the VM.  In
+VMs are favored for the distribution of complicated applications as experts can
+configure them and release the results as a complete working system.  This
+approach may limit non-expert use to the VM appliance, which may be undesirable
+for users that want to configure their own systems without reuse of the
+existing VM.  Guides may exist for the creation of systems, most systems are
+too complex for non-experts to produce similar results found in the VM.  In
 addition to supplying VMs, we also supply packages for Debian and Ubuntu
 systems, DEB files.  These enable easy installation in arbitrary environments
-and through the use of package managers, APT in the case of Debian and Ubuntu,
-which handle configuration such users can focus on the end result and not
-stumble during setup.  Our packages install a complete working system given a
-working installation of Ubuntu or Debian, such that the a fresh installation of
-Ubuntu whether on a physical machine or on the cloud can be configured by
-following these steps:  add the configuration data ionto the newly configure
-resource, our package repository to the managers list, and our repositories
-signing key to the key chain for repoistories and finally selecting our
-packages and installing them.  At which point, the system will connect to the
-grid.
+through the use of package managers, APT in the case of Debian and Ubuntu,
+which handle configuration and dependencies, allowing users can focus on the
+end result and not stumbling during setup.  Given an Ubuntu or Debian
+installation on a physical, virtual, or cloud machine, a new ``Grid Appliance''
+can be configured by following these steps:  add the configuration data into
+the newly configured resource, our package repository to the remote
+repositories list, and our repositories signing key to the key chain for
+repositories and finally selecting our packages and installing them.  At which
+point, the system will connect to the grid.
 
 To verify the utility of our approach, we have evaluated the time required to
 create and utilize a grid consisting of various distributed resources using the
@@ -412,38 +411,54 @@ through the use of VPNs, but relies on centralized VPN and resource management.
 Each approach addresses a unique challenge in grid computing, but none
 addresses the challenge presented as a whole: easily constructing distributed,
 cross-domain grids.  Challenges that we consider in the design of our system
-are ensuring that submission sites can exist any where and are not confined to
+are ensuring that submission sites can exist any where not being confined to
 complex configuration or highly available, centralized locations; ability to
 dynamically add and remove resources by starting and stopping an appliance; and
 the ability for individual sites to share a common server or to have one or
 more per site so that no group in the grid is dependent on another.  We
-emphaize these points, while still retaining the ease of use of Boinc, the
+emphasize these points, while still retaining the ease of use of Boinc, the
 connectivity of PVC, and the flexibility of BonjourGrid.  The end result is a
-system similar in organization to OurGrid~\cite{ourgrid}, though with
-self-configuration and organization and a VPN to transparently handle network
+system similar in organization to OurGrid~\cite{ourgrid}, though whereas OurGrid
+requires manual configuration amongst sites and networking considerations to
+ensure communication amongst sites, the ``Grid Appliance'' transparently handles
+configuration and organization issues with a VPN to transparently handle network
 constraints.
 
 \section{Conclusions}
 \label{conclusions}
 
 In this paper, we have described a novel grid architecture that enables both
-wide area and educational grid middleware.  Our results show that the process
-of connecting the resources together are not significantly longer than that of
-actually starting the resources and that submission sites have very low
-overheads in connecting to the resources.  Furthermore, we have practical
-experience of using the system for over 2 years through a project called
+wide area and educational grid middleware.  Our results from
+Section~\ref{system} show that the process of connecting the resources together
+are not significantly longer than that of actually starting the resources.
+Furthermore, we have shown that submission sites have very low overheads in
+connecting to the resources.  For future work, we intend on expanding the
+utility of the ``Grid Appliance'' to support completely decentralized grid
+computing.
+
+With regards to practical experience, we have been providing a service called
 Archer~\cite{archer}, an active grid deployed for computer architecture
-research.  Archer currently spans four seed universities with 500 resources
-with over hundreds of students and researchers submitting jobs totaling over
-150,000 hours of job execution in the past year alone.  Groups at the
-Universities of Florida, Clemson, Arkansas, and Northwestern Switzerland have
-used it as a tool to teach grid computing.  Clemson and Purdue are constructing
-campus grids using the underlying VPN to connect resources together.  Recently,
-two private small-scale systems have come online using our shared system
-available at \url{www.grid-appliance.org}.  Feedback from users through surveys
-have shown that non-expert users are able to connect to our public Grid
-appliance pool in a matter of minutes by simply downloading and booting a
-plug-and-play VM image that is portable across VMware, VirtualBox, and KVM.
+research, for nearly 3 years.  Archer currently spans four seed universities
+with 500 resources with over hundreds of students and researchers submitting
+jobs totaling over 150,000 hours of job execution in the past year alone.
+Groups at the Universities of Florida, Clemson, Arkansas, and Northwestern
+Switzerland have used it as a tool to teach grid computing.  Clemson and Purdue
+are constructing campus grids using the underlying VPN to connect resources
+together.  Recently, two private small-scale systems have come online using our
+shared system available at \url{www.grid-appliance.org}.  Feedback from users
+through surveys have shown that non-expert users are able to connect to our
+public Grid appliance pool in a matter of minutes by simply downloading and
+booting a plug-and-play VM image that is portable across VMware, VirtualBox,
+and KVM.
+
+\section*{Acknowledgments}
+
+We thank the anonymous reviewers for their useful comments and feedback and
+Perhaad Mistry for his help in providing direct access to Northeastern
+University's Archer resources for experiments.  This work is sponsored by the
+National Science Foundation under awards 0751112 and 0721867.  Any opinions,
+findings and conclusions or recommendations expressed in this material are
+those of the authors and do not necessarily reflect the views of the NSF.
 
 \bibliographystyle{IEEEtran}
 \bibliography{DecentralizedGrids}
