@@ -8,6 +8,24 @@
 \usepackage{amsmath}
 \usepackage{fmtcount}
 
+\setlength{\parskip}{0pt}
+\setlength{\parsep}{0pt}
+\setlength{\headsep}{0pt}
+\setlength{\topskip}{0pt}
+\setlength{\topmargin}{0pt}
+\setlength{\footskip}{0pt}
+
+\setlength{\topsep}{2pt}
+\setlength{\partopsep}{0pt}
+\setlength{\itemsep}{0pt}
+
+\setlength{\floatsep}{4pt}
+\setlength{\dblfloatsep}{4pt}
+\setlength{\textfloatsep}{4pt}
+\setlength{\dbltextfloatsep}{4pt}
+\setlength{\abovecaptionskip}{4pt}
+\setlength{\intextsep}{2pt}
+
 \widowpenalty=100000
 \clubpenalty=100000
 
@@ -19,6 +37,7 @@ Appliance}
 \author{
 \IEEEauthorblockA{
   David Isaac Wolinsky,
+  Arjun Prakash,
   Renato Figueiredo
 }
 \IEEEauthorblockN{
@@ -161,7 +180,7 @@ use of a manually configured grid.
 The process begins with the first step, labeled ``User.'' At this point, the
 user should be aware of the core user components of ``The Grid Appliance,'' the
 group website, ability to deploy VMs or alternatively physical resources, and
-how to interact with Condor~\cite{condor}, our grid task scheduler of choice as
+how to interact with Condor~\cite{condor0}, our grid task scheduler of choice as
 motivated by Section~\ref{middleware}.  To address users who may not be
 familiar with these parts, helpful tutorials are provided on
 \url{www.grid-appliance.org}.  The process begins with a user creating a new
@@ -471,6 +490,17 @@ cluster and grid software do not easily support multiple submit points, in
 fact, most require another piece of software to bridge the gap between cluster
 and grid, or more explicitly distribution of the system.
 
+\begin{figure*}[h!t!]
+\centering
+\epsfig{file=figs/NAT.eps, width=5in}
+\caption{A typical NAT interaction. The peer behind a NAT has a private address.
+When the packet is sent through the NAT, the NAT translates the source information
+into a public mapping, keeping the original source information so that if a
+packet from the remote peer comes back, it can be translated and delivered to
+the original source.}
+\label{fig:nat}
+\end{figure*}
+
 Further motivating Condor is the ease in adding new resources.  To add new
 resources to a Condor system, an execute or submission node must have the IP
 address for the manager, the rest of the system organization is performed
@@ -516,17 +546,6 @@ bootstrap grid middleware through IP multicast.  IP multicast works on all LANs
 and is used by many popular applications for discovery, such as Windows Media
 Center and iTunes by meanas of the UPNP (DLNA) and DAAP protocols,
 respectively.
-
-\begin{figure*}[h!t!]
-\centering
-\epsfig{file=figs/NAT.eps, width=5in}
-\caption{A typical NAT interaction. The peer behind a NAT has a private address.
-When the packet is sent through the NAT, the NAT translates the source information
-into a public mapping, keeping the original source information so that if a
-packet from the remote peer comes back, it can be translated and delivered to
-the original source.}
-\label{fig:nat}
-\end{figure*}
 
 The two systems that we have used to configure through IP multicast are Hadoop
 and MPICH.  Hadoop configuration consists of a head node and worker nodes,
@@ -586,12 +605,12 @@ Hadoop would need to ensure that all resources were bridged to the LAN and not
 through a VM NAT, the typical configuration, otherwise the multicast message
 would not be delivered to all participants.  The VPN software supports the
 ability to self-organize using existing infrastructures including IP multicast,
-public overlays, and Xmpp as described in our previous work~\cite{p2p10}.  This
-is in contrast to other VPNs like Hamachi~\cite{hamachi},
-OpenVPN~\cite{openvpn}, Tinc~\cite{tinc}, Violin~\cite{violin},
-ViNe~\cite{vine}, or VNET~\cite{vnet}, that are either centralized and require
-a dedicated node to coordinate peers or decentralized solutions that require
-manual configuration of links between peers.
+public overlays, and Xmpp as described in our previous
+work~\cite{bootstrapping}.  This is in contrast to other VPNs like
+Hamachi~\cite{hamachi}, OpenVPN~\cite{openvpn}, Tinc~\cite{tinc},
+Violin~\cite{violin}, ViNe~\cite{vine}, or VNET~\cite{vnet}, that are either
+centralized and require a dedicated node to coordinate peers or decentralized
+solutions that require manual configuration of links between peers.
 
 Using the aforementioned techniques ``Grid Appliances'' can be constructed in
 one of two ways: local and wide area.  The ``Grid Appliance'' ships with two
@@ -782,7 +801,7 @@ can be executed a direct VPN link must be established between the submission
 site and the task worker.  The amount of time required varies on the network
 configuration, though in all cases a direct link will be established.
 Sometimes that direct link consist of routing through a well chosen proxy as
-discussed in~\cite{collaboratecom}.
+discussed in~\cite{groupvpn}.
 
 With the ``Grid Appliance,'' users are not limited to accessing their files
 through SSH and SFTP.  We have also configured the ``Grid Appliance'' to
@@ -851,18 +870,15 @@ less than 10 seconds, while typical NATs keep mappings for over 30 seconds.
 \section{Lessons Learned}
 \label{lessons_learned}
 
-In this section, we will present some of our previous experiences and features
-of Grid Appliance that proved to important lessons learned that were not
-obvious when we started.
-
-A significant component of our experience stems from the computational grid
+In this section, we will present some of our previous experiences in using and
+developing the Grid Appliance that were not obvious when we started.  A
+significant component of our experience stems from the computational grid
 provided by Archer~\cite{archer}, an active grid deployed for computer
-architecture research, available for over 3 years.  Archer currently spans four
-seed universities contributing.  The core of Archer consist of more than 500
-CPUs at these seed universities as well as contributions from external users.
-The Archer grid has been accessed by over hundreds of students and researchers
-submitting jobs totaling over 200,000 hours of job execution in the past year
-alone.
+architecture research, which has been online for over 3 years.  Archer
+currently spans four seed universities contributing over 500 CPUs as well as
+contributions and activities from external users.  The Archer grid has been
+accessed by over hundreds of students and researchers submitting jobs totaling
+over 400,000 hours of job execution in the past two years alone.
 
 The Grid Appliance has also been utilized by groups at the Universities of
 Florida, Clemson, Arkansas, and Northwestern Switzerland as a tool for teaching
@@ -877,17 +893,17 @@ that is portable across VMware, VirtualBox, and KVM.
 
 \subsection{Stacked File Systems}
 
-Configuring systems can be difficult by itself, but then trying to make
-packages so that others can reproduces an identical configuration requires
-significant amounts of effort from first time package developers.  To address
-these concerns, we provided a stackable file system also known as
-copy-on-write, its design was described in our previous work~\cite{vtdc}.  At
-this point in time the ``Grid Appliance'' was solely based upon VMs.  Each VM
-would consist of 3 disks, one being the ``Grid Appliance'' base image, the
-software stack configured by us; another was something we called a module; and
-the last was a home disk.  In normal usage, both the base and module images are
-treated as read-only file systems with all user changes to the system being
-recorded by the home image, as depicted in Figure~\ref{fig:stackfs}.
+Configuring systems can be difficult, which makes it important to have the
+ability to share the resulting system with others.  The approach of actually
+creating packages can be overly complicated for novices, to adress this
+concern, our original ``Grid Appliance'' supported a built-in mechanism to
+create packages through a stackable file system using copy-on-write, as
+describe in~\cite{vtdc}.  The appliance at that time ran only on VM consisting
+of 3 disks: the ``Grid Appliance'' base image, the software stack configured by
+us; a module; and a home disk.  In normal usage, both the base and module
+images are treated as read-only file systems with all user changes to the
+system being recorded by the home image, as depicted in
+Figure~\ref{fig:stackfs}.
 
 \begin{figure}[ht]
 \centering
@@ -898,178 +914,165 @@ and all writes are directed to Home.}
 \label{fig:stackfs}
 \end{figure}
 
-When we released new versions of the ``Grid Appliance'' a user could easily
-replace the ``Grid Appliance'' base image with the new one, keeping their
-module and home disk images.  Users that wanted to extend the configuration of
-the ``Grid Appliance'' could launch into a developer mode.  While in developer
-mode, all changes would be written to the module image and the home image was
-ignored.  Users could run a script to prepare the module image for sharing,
-shutdown the VM, and redistribute the module as a package.
+Users could easily upgrade to new versions of the ``Grid Appliance'' by
+replacing their base image with a new one, while keeping their module and home
+disks.  While the purpose of the module was to allow users to extend the
+configuration of the ``Grid Appliance.''  To do so, the user would launch into
+developer mode, where all changes would be written to the module image,
+rendering the home image unused.  Upon completing the changes, a user would run
+a script that would clean the system and prepare it for sharing.  A user could
+then share the resulting module image with others.
 
-We actually had a few groups actually take advantage of the approach for
-creating modules.  Though there existed a few unfortunate issues with the
-approach.  There exists no kernel level support for stackable file systems, we
-had to add UnionFS~\cite{unionfs} to the kernel, adding the weight of
-maintaining a kernel unto our shoulders.  In addition, when we upgraded the
-distribution to newer versions, the module was often times broken.  The last
-remaining issue was that the approach was incompatible with hosts other than
-VMs.  While we still think the concept is great, we have removed it from our
-mainline appliance.  We feel that the future work for this type of application
-will be to allow users to configure a system and then make it easy for them to
-create packages.  Doing so will allow the packages to be significantly more
-portable and less configuration headaches.
+While there were users for this approach, the issues with it made it
+unattractive to continue using.  First, there exists no kernel level support
+for stackable file systems, we had to add UnionFS~\cite{unionfs} to the kernel,
+adding the weight of maintaining a kernel unto our shoulders.  While there does
+exist FUSE, or filesystem in userspace, solutions, using those properly require
+modifications to the initial ramdisk, reproduced automatically during the
+installation of every new kernel, furthermore, our experience with them
+suggests they are not well suited for production systems.
+
+The approach was also limited to VMs, hosts such as clouds and physical
+resources could not, easily, take advantage of it.  So while we still think the
+concept is great, we have removed it from our mainline appliance.  We feel that
+the future work for this type of application will be to allow users to
+configure a system and then make it easy for them to create packages.  Doing so
+will allow the packages to be significantly more portable and less
+configuration headaches.  Also, to deal with upgrades, we use standard package
+management, so users do not need to deal with VM disk images to upgrade.
 
 \subsection{Timing in Virtual Machines}
 
-A recent white paper from VMWare~\cite{vmware_timing} suggests that when using
-virtual machines to synchronize with the hosts time through virtualized timing
-services and to avoid using services like NTP (network time protocol), which
-disagree with the host time and may have adverse affects on timing inside the
-virtual machine.  Our experiences recommend the opposite with virtualized time
-responsible for drastic timing jumps and significantly off virtual clocks due
-to the host clocks that are incorrectly set.  It seems the virtual clock would
-force an immediate jump in timing for the virtual clock, which could be quite
-significant if the VM had not been scheduled recently enough.  NTP, on the
-other hand, gradually corrects time.  This major jump would cause the system to
-completely stall due to software that was unable to handle the unreliability in
-time.  We also had software that would not work properly since the time on the
-machine disagreed with the time on the remote machine, an issue when using
-license servers.  Unfortunately we were unable to fix the timing on the host,
-since it was not our machine.  We conclude that system developers be wary when
-using virtual timing and consider using NTP, especially if your application
-will run on a device where the user may not have the ability to change the
-hosts timing.  It should be noted that the paper from VMWare does not
-explicitly recommend against NTP, just that it can be difficult to properly to
-configure.  For example, if a solitary NTP server is chosen, it may be offline
-or behave erratically, an issue typically bypassed when using the default NTP
-server provided the operating system distributor.
+% Maybe remove 
+
+Certain applications, particularly license servers, are sensitive to time.
+When constructing a grid consisting of many distributed resources, there is a
+good possibility that time will be wrong somewhere.  With regards to VMs,
+VMWare~\cite{vmware_timing} suggests synchronizing with the hosts time and to
+avoid using services like NTP (network time protocol), which may have adverse
+affects on timing inside the virtual machine.  Our experiences recommend the
+opposite, we have experienced drastic timing jumps and significantly off
+virtual clocks due to host clocks being set incorrectly.  It seems the virtual
+clock would force an immediate jump in timing for the virtual clock, which
+could be quite significant if the VM had not been scheduled recently enough.
+NTP, on the other hand, gradually corrects time.  This major jump would cause
+the system to completely stall due to software that was unable to handle the
+unreliability in time.  Because in many cases, the VMs run on machines that are
+not owned by the VM owner, correcting the host time is not possible.  Our
+conclusion is that developers should be wary when using virtual timing,
+especially if they are constructing distributed systems.  Rather they should
+consider using NTP, especially if your application will run on a device where
+the user may not have the ability to change the hosts timing.  It should be
+noted that the paper from VMWare does not explicitly recommend against NTP,
+just that it can be difficult to properly to configure.  For example, if a
+solitary NTP server is chosen, it may be offline or behave erratically, an
+issue typically bypassed when using the default NTP server provided the
+operating system distributor.
 
 \subsection{Selecting a VPN IP Address Range}
 
-When deploying VPNs, it is desirable to limit potential overlap of the VPN
-network space and other networks that may run the grid software.  If the two
-overlap, the user will not be able to directly connect to the grid.  Doing so
-would confuse the networking stack as there would be two network interfaces
-inside the same network address space but not connected to the same network.
-The best condition would be that the VPN would fail to work, but in some
-instances this could make the entire networking stack inoperable until the VPN
-was stopped.  To get around this a user could potentially run the VPN behind a
-NAT, for example, a VM could use a VMM NAT or a cluster could be running behind
-a NAT device.
+The challenging to deploying a VPN is ensuring that the address space does not
+overlap with that over the environments where it will be used.  If there is
+overlap, users will be unable to connect to the VPN.  Doing so will confuse the
+network stack, because there would be two network interfaces connected to the
+same address space but not the same network.  One potential solution is for a
+user to run the VPN behind a NAT, like inside a VM behind a VM NAT or a
+cluster beind a NAT device.
 
-For the ``Grid Appliance,'' we did not want users to have to concern themselves
-about these issues.  To address these issues Ala Rezmerita et.al.~\cite{pvc}
-recommended using the experimental address class E ranging between 240.0.0.0 -
-255.255.255.254.  In order to do, Linux requires kernel modifications.  At
-first this was not much of an issue, but over time the issues against this
-approach accumulated.  There were both bug and security fixes for the kernel,
-each time requiring us to rebuild and ship that kernel to users, as opposed to
-using the one that came with the distribution.  As we began experimenting with
-and had user requests to run thek ``Grid Appliances'' on physical and cloud
-machines, it became apparent that this approach was not reasonable.  If a user
-was using a machine for more than just the ``Grid Appliance,'' they may not
-want to use a non-standard kernel.  The clouds did this approach in, you cannot
-modify the kernel in most cloud setups as they build on top of Xen, which means
-you are unable to provide your own kernel.
+Users of the ``Grid Appliance'' should not have to concern themselves of these
+issues.  Prior work on the topic by Ala Rezmerita et al.~\cite{pvc} recommended
+using the experimental address class E ranging between 240.0.0.0 -
+255.255.255.254, though this requires Linux kernel modifications.  Though with
+the amount of bugs and security fixes regularly pushed into the kernel,
+maintaining a forked kernel requires a significant amount of time, duplicating
+the work already being performed by the OS distribution maintainers.  This also
+limited deployment in physical and cloud machines.  Users that wanted to
+multipurpose a physical resource may not want to run a modified kernel, while
+in most cloud setups the kernel choice is limited.
 
-In the current model, we take advantage of the 5.0.0.0 - 5.255.255.255 address
-space.  The advantage of this space is that like the class E it is unallocated,
-but it requires no changes to any operating systems.  The only disadvantage is
-that it is extremely popular to use inside the VPN community.  So that means a
-user would be unable to use the GroupVPN with another VPN at the same time.
-This is much better than having to provide kernels or worrying about users
-being able to not connect due to the LAN overlapping with the VPN address
-space.  Though even with this in place, we still see users using address ranges
-in normal private network address ranges for the VPN, like 10.0.0.0 -
-10.255.255.255 and 192.168.0.0 - 192.168.255.255.
+We have since moved towards using the 5.0.0.0 - 5.255.255.255 address range.
+Like the class E address space it is unallocated, but it requires no changes to
+any operating systems.  The only limitation is that some other VPNs also use
+it, thus a user would not be able to run two VPNs on the same address space
+concurrently.  This approach is much better than providing kernels or dealing
+with network address overlaps.  Interestingly, even with this in place, we
+still see some ``GroupVPNs''  using address ranges in normal private network
+address ranges for the VPN, like 10.0.0.0 - 10.255.255.255 and 192.168.0.0 -
+192.168.255.255.
 
 \subsection{Securing the VPN and Overlay}
 
-In our original design, appliance would secure the VPN through the
-Racoon~\cite{racoon} and IPSec stack in Linux kernel.  This model was kept
-through our first generation of Archer deployment and GroupVPN.  Our
-realization though was that the use of IPSec only partially secured the VPN and
-also limited its deployment to the ``Grid Appliance'' or to users who were
-knowledgeable enough to configure an IPSec stack, which was not a requirement
-we wanted for those that wanted to use physical resources.  With regards to
-securing the VPN, the IPSec solution still left the P2P overlay insecure, so
-while users could trust the communication, when secure connections were formed,
-the overlay could potentially be derailed by malicious users.  Securing the P2P
-layer with IPSec would have been extremely complicated, since IPSec rules would
-need to be created for the peers prior to initiating communication and when
-dealing with a P2P system with dynamic members that requires clairvoyance.
-Still the solution would also be hampered by network configuration issues that
-are introduced by NATs and firewalls.  IPSec was effectively not an option.
+Our original design secured the virtual network through a kernel level IPsec
+stack.  A model kept through our first generation Archer deployment and
+GroupVPN.  The problem with this approach is that securing links of the VPN
+only partially secures the P2P VPN and using IPsec, which is not trivially
+configured, to pre-configured environments.  Securing the P2P layer is
+important, otherwise malicious users could easily derail the entire system, but
+securing with IPsec would practically negate the benefits of the P2P system,
+because of network configuration issues related to NATs and firewalls.
 
-To follow this work, we implemented a security filter model that could be used
-to secure both VPN communication as well as P2P communication.  The security
-filter supports both DTLS and a protocol similar to IPSec.  The overheads of
-using security turned out to be significantly small, as we explored
-in~\ref{p2p10}.
+To address these, we implemented a security system directly into the P2P
+system, thus securing both VPN and P2P communication.  The security filter
+supports both DTLS and a protocol similar to IPSec.  The overheads of using
+security turned out to be significantly small, as we explored
+in~\cite{bootstrapping}.
 
 \subsection{Towards Unvirtualized Environments}
 
-As users became more familiar and comfortable with the system, they no longer
-want to run it inside a VM, especially if they have a dedicated computing
-cluster or want to run it inside the cloud.  Like a VM, a cloud instance could
-easily be created and then shared, but a physical machine is a little more
-complicated as it requires specialized non-standard software to create a system
-and then share that image with others.  Especially since other machines may
-have different hardware configurations that may actually prevent reusing that
-physical machine image.
+Users comfortable with the system and wanting to dedicate computers to their
+``Grid Appliance'' grid wanted to remove the overheads of using a VM as well as
+being able extend their compute resources into the cloud.  So while, we could
+create shareable cloud instances, but a physical machine is a little more
+complicated as it requires specialized non-standard software to create a
+shareable image.  Especially since other machines may have different hardware
+configurations that may actually prevent reusing a shared image.
 
-As a result of requests from users, we focused on two means to better integrate
-with physical machines.  First, we moved away from packaging a VM appliance and
-more towards creating packages.  Secondly, we have improved the VPN to support
-a router mode whereby a single VPN can be used by many machines inside a LAN.
-As discussed early, the implications of packages mean that users can easily add
-the packages to their installation scripts for machines and have the packages
-automatically added.  It also makes it easy to take an existing system and
-install software.  The effect of supporting a VPN router meant that machines on
-a LAN can communicate directly with each other rather than through the VPN.
-That means if they are on a gigabit network, they can full network speeds as
-opposed to being limited to 20\% of that due to the VPN, this was discussed
-more in our previous work~\cite{sc09}.
+Due to requests from users wanting better integration with physical machines
+and as a result of moving away from stackable file, we move towards creating
+installable packages.  Also, we improved the VPN to support a router mode,
+whereby a single VPN can be used by many machines inside a LAN.  The
+implications of packages mean that users can easily produce ``Grid Appliances''
+from installed systems or during system installation.  While the VPN router
+allows resources inside a LAN to communicate directly with each other rather
+than through the VPN.  That means if they are on a gigabit network, they can
+full network speeds as opposed to being limited to 20\% of that due to the VPN,
+this was discussed more in our previous work~\cite{sc09}.
 
 \subsection{Advantages and Challenges of the Cloud}
 
-Over the past year, we have had the experience of deploying the ``Grid
-Appliance'' on three different cloud stacks:  Amazon's EC2~\cite{ec2}, Future
-Grid's Eucalyptus~\cite{eucalyptus}, and Future Grid's Nimbus~\cite{nimbus}.
-All of the systems, we have encountered so far, allow a user to upload a small
-amount of unique data with each cloud instance started.  When an instance
-starts, it can download the data from a static URL that is only accessible from
-within the instance, for example, EC2 user data is accessible at
-\url{http://169.254.169.254/latest/user-data}.  This allows ``Grid Appliance''
-cloud instances to be configured via user-data, which is actually the same
-configuration data used as the virtual and physical machines, albeit
-compressed.  To make the supports of clouds transparent, the ``Grid Appliance''
-goes through a process, first checking to see if there is a physical floppy
-disk, then if there is one in a specific directory
-(\url{/opt/grid\_appliance/var/floppy.img}), then the EC2 / Eucalyptus URL, and
-finally the Nimbus URL.  The process mounts the floppy, however, it was provide
-and then converges towards parsing the configuration data in the floppy.
+We have had the experience of deploying the ``Grid Appliance'' on three
+different cloud stacks:  Amazon's EC2~\cite{ec2}, Future Grid's
+Eucalyptus~\cite{eucalyptus}, and Future Grid's Nimbus~\cite{nimbus}.  All of
+the systems, encountered so far, allow for data to be uploaded with each cloud
+instance started.  The instance can then download the data from a static URL
+only accessible from within the instance, for example, EC2 user data is
+accessible at \url{http://169.254.169.254/latest/user-data}. A ``Grid
+Appliance'' cloud instances can be configured via user-data, which is the the
+same configuration data used as the virtual and physical machines, albeit zip
+compressed.  The ``Grid Appliance'' seeks the configuration data by first
+checking for a physical floppy disk, then in specific directory
+(\url{/opt/grid\_appliance/var/floppy.img}), followed by the EC2 / Eucalyptus
+URL, and finally the Nimbus URL.  Upon finding a floppy and mounting it, the
+system continues on with configuration.
 
-Cloud systems make it very convenient to do debugging.  Amazon, unfortunately,
-is not very cheap to do large scale testing, where starting 50 nodes for a few
-hours easily runs tens of dollars.  If the system has bugs, this process may
-need to be repeated, quickly upping the cost.  With the recent coming of Future
-Grid, we have been able to freely do this style of debugging for free.  Though
-we have learned a little bit from using these other grid services.  Because the
-user data is binary data and the communication exchange uses RPC, which could
-be mangled by some of the binary data, it must be converted to base64 before
-transferring and converted back into binary data afterward.  EC2 handles this
-transparently, if using command-line tools.  Unfortunately, Eucalyptus and
-Nimbus do not, even though Eucalyptus is supposed to be compatible with EC2.
+Beyond the use of extending into clouds for on-demand resources, they are also
+very convenient for debugging.  Doing so on Amazon though is not free.
+Fortunately, grid researchers now can have free access to Future Grid with both
+Eucalyptus and Nimbus style clouds.  We did have to do some tinkering to get
+these systems to work.  First, because the user data is binary data and the
+communication exchange uses RPC, which may have difficulty handling binary
+data, it must be converted to base64 before transferring and converted back
+into binary data afterward.  EC2 handles this transparently, if using
+command-line tools.  Unfortunately, Eucalyptus and Nimbus do not, even though
+Eucalyptus is supposed to be compatible with EC2.
 
 Furthermore, when starting an EC2 instance, networking is immediately
-available, whereas with Eucalyptus and Nimbus, networking often takes more than
-10 seconds after starting the VM to work.  This creates a problem if the system
-uses a startup script to download the configuration data.  There are a few
-potential solutions to deal with this, such as simply having a script wait
-until the primary Ethernet device (eth0) has an IP or alternatively have a
-script that hooks into the DHCP system to receive calls when a network device
-is configured.
+available, whereas with Eucalyptus and Nimbus, networking often times takes
+more than 10 seconds after starting to be available. Thus a startup script must
+be prepared for networking not to be ready and hence unable to immedately
+download user data.  The best approach to deal with this in a distribution
+independent manner is to wait until the primary Ethernet device (eth0) has an
+IP and then continuing.
 
 \section{Related Work}
 \label{related_work}
@@ -1109,23 +1112,26 @@ the entry barrier to constructing wide-area grids from scratch.  The work
 required to reproduce a grid system as useful as the one constructed by the
 ``Grid Appliance'' is quite significant as illustrated in
 Section~\ref{case_study}.  We have replaced those requirements through the use
-of a web interface, virtual machines, and packages.
+of a web interface that produces configuration files that enable grid resources
+to automatically acquire security credentials and organize the grid, a P2P VPN
+that transparently enables all-to-all connectivity, and easy deployment through
+virtual machines and packages.
 
-Users begin constructing their grid by accessing either a common web interface
-or use our shared one to establish a group for VPN purposes and isolating the
-grid and subgroups to ensure priority on group contributed resources.
-Afterward users can deploy pre-configured cloud or virtual systems or configure
-physical resources by adding a package repository and installing the ``Grid
-Appliance'' packages, lending itself well to beginners but allowing more
-options for more power users.
+Users are welcome to share our public web interface or deploying their own,
+from there, they can begin to construct their own grid by establish a group for
+VPN purposes and appliance subgroups for priority and delegation purposes.
+With this in place, users of the grid can deploy pre-configured cloud or
+virtual systems or configure physical resources by adding a package repository
+and installing the ``Grid Appliance'' packages, lending itself well to
+beginners but allowing more options for more power users.
 
 Our results from Section~\ref{evaluation} show that the process of connecting
 the resources together is not significantly longer than that of actually
 starting the resources.  Furthermore, we have shown that submission sites have
-very low overheads in connecting to the resources.  The main limitation is the
-requirement for a global job queue or server, our future work will focus
-mechanisms to support completely decentralized grid computing while maintaining
-the trust and reliability of our current system.
+very low overheads in connecting to the resources.  The main limitation, which
+is common to all grids is requirement of a global job queue or server, our
+future work will focus mechanisms to support completely decentralized grid
+computing while maintaining the trust and reliability of our current system.
 
 \section*{Acknowledgments}
 
