@@ -19,11 +19,11 @@
 %\setlength{\partopsep}{0pt}
 %\setlength{\itemsep}{0pt}
 
-%\setlength{\floatsep}{4pt}
-%\setlength{\dblfloatsep}{4pt}
-%\setlength{\textfloatsep}{4pt}
-%\setlength{\dbltextfloatsep}{4pt}
-%\setlength{\abovecaptionskip}{4pt}
+\setlength{\floatsep}{4pt}
+\setlength{\dblfloatsep}{4pt}
+\setlength{\textfloatsep}{4pt}
+\setlength{\dbltextfloatsep}{4pt}
+\setlength{\abovecaptionskip}{4pt}
 %\setlength{\intextsep}{2pt}
 
 \widowpenalty=100000
@@ -468,6 +468,17 @@ advantage of special features without affecting the use of less complex tasks.
 \addtocounter{footnote}{1}
 \footnotetext[\value{footnote}]{\url{http://www.sun.com/offers/docs/Extreme\_Scalability\_SGE.pdf}}
 
+\begin{figure*}[h!t!]
+\centering
+\epsfig{file=figs/NAT.eps, width=5in}
+\caption{A typical NAT interaction. The peer behind a NAT has a private address.
+When the packet is sent through the NAT, the NAT translates the source information
+into a public mapping, keeping the original source information so that if a
+packet from the remote peer comes back, it can be translated and delivered to
+the original source.}
+\label{fig:nat}
+\end{figure*}
+
 Considering these three issues:  submission site, job queue site, and API
 requirements, we firmly believe that out of the potential choices Condor
 matches best.  While systems like PastryGrid and BonjourGrid are developing
@@ -496,17 +507,6 @@ computing projects.  As described above, most of the available cluster and grid
 software do not easily support multiple submit points, in fact, most require
 another piece of software to bridge the gap between cluster and grid, or more
 explicitly distribution of the system.
-
-\begin{figure*}[h!t!]
-\centering
-\epsfig{file=figs/NAT.eps, width=5in}
-\caption{A typical NAT interaction. The peer behind a NAT has a private address.
-When the packet is sent through the NAT, the NAT translates the source information
-into a public mapping, keeping the original source information so that if a
-packet from the remote peer comes back, it can be translated and delivered to
-the original source.}
-\label{fig:nat}
-\end{figure*}
 
 Further motivating Condor is the ease in adding new resources.  To add new
 resources to a Condor system, an execute or submission node must have the IP
@@ -776,46 +776,63 @@ do not conflict with the utility of our approach.  This evaluation's goal is to
 determine the time required to start a grid and run a task on the connected
 resources individually at multiple sites individually and then cumulatively.
 We compare a statically configured grid versus our dynamic ``Grid Appliance.''
+This evaluation does not include the time required to prepare a static
+environment, including the signing of VPN certificates nor specifying the head
+node at each individual resource, as these tasks are not automatable and
+require individual configuration by the grid deployer.  Additionally, the
+evaluation only has a single submission node, in a system with multiple
+submitters, the OpenVPN server could easily become a bandwidth bottleneck in
+the system as all data must pass through it, which can be avoided using
+GroupVPN.
+
 The three environments chosen are Amazon's EC2 supporting a simple 1:1 NAT,
 University of Florida directly behind an ``iptables'' NAT and then a Cisco NAT,
-and finally a Future Grid at University of Indiana's using Eucalyptus behind
-what appeared to be an ``iptables'' NAT.
-
-Prior to beginning the evaluation a manager and submission node are started and
-connectivity between the two are verified.  In the static system, OpenVPN is
-run from the manager node.  The evaluations were run sufficiently enough to
-ensure that the measured delays were due to the configuration of the grids and
-not glitches in the underlying systems, i.e., unpredictable behavior due to
-shared resources at UF and in the clouds.  We measured the time from when the
-last grid resource was started to the time it reported to the manager node,
-Figure~\ref{fig:connect} as well as the time required for the submit node to
-queue and run a 5 minute job on all the connected workers,
-Figure~\ref{fig:run}.  The tests were run on 50 resources in each environment
-and then on a grid consisting of all 150 resources with 50 at each site.
+and finally Future Grid at Indiana University using Eucalyptus behind what
+appeared to be an ``iptables'' NAT.  Prior to beginning the evaluation a
+manager and submission node were started and connectivity between the two was
+verified.  In the static system, OpenVPN is run from the manager node.  The
+evaluations were run three times.  Between iterations, the submission node and
+the manager node were restarted to clear any state.  We measured the time from
+when the last grid resource was started to the time it reported to the manager
+node, Figure~\ref{fig:connect} as well as the time required for the submit node
+to queue and run a 5 minute job on all the connected workers,
+Figure~\ref{fig:run}.  The purpose of the latter test is to measure the time it
+takes for a submission site to queue a task to all workers, connect to the
+workers, submit the job, and to receive the results; thus a stress test on the
+GroupVPN's dynamic link creation and verifying all-to-all connectivity.  The
+tests were run on 50 resources (virtual machines / cloud instances) in each
+environment and then on a grid consisting of all 150 resources with 50 at each
+site.
 
 \begin{figure}[ht]
 \centering
 \epsfig{file=figs/connect.eps, width=2.75in}
 \caption{Comparison of times to construct a grid in various environments using
-both a statically configured grid and a grid constructed by the ``Grid Appliance.''}
+both a statically configured grid and a grid constructed by the ``Grid
+Appliance.''  Legend:  EC2 - Amazon's EC2, Euca - Indiana University's
+Eucalyptus, UF - Unversity of Florida's ACIS Lab resources, Static - OpenVPN,
+GA - Grid Appliance.}
 \label{fig:connect}
 \end{figure}
 
 \begin{figure}[ht]
 \centering
 \epsfig{file=figs/run.eps, width=2.75in}
-\caption{Comparison of times to run a 300 second job in various grids configured
-statically and through the ``Grid Appliance.''}
+\caption{Comparison of times to run a 300 second job on each resource in
+various grids configured statically and through the ``Grid Appliance.''
+Legend:  EC2 - Amazon's EC2, Euca - Indiana University's Eucalyptus, UF -
+Unversity of Florida's ACIS Lab resources, Static - OpenVPN, GA - Grid
+Appliance.}
 \label{fig:run}
 \end{figure}
 
 The results make it very clear that the overheads introduced through a
 decentralized, P2P VPN are minimal and that the time to connected is not
 significantly longer than a statically configured environment with a
-centralized VPN.  The current ``Grid Appliance'' relies on polling and uses
-very lose timing, so as to not hammer the system.  Either shrinking those times
-or moving to an event based system should significantly improve the speed at
-which connectivity occurs.  
+centralized VPN.  The current ``Grid Appliance'' relies on polling with long
+delays, so as to not have negative effects on the system.  Either shrinking
+those times or moving to an event based system should significantly improve the
+speed at which connectivity occurs.  
 
 \section{Lessons Learned}
 \label{lessons_learned}
