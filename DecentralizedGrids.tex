@@ -53,26 +53,25 @@ Appliance}
 ``Give a man a fish, feed him for a day.  Teach a man to fish, feed him for a
 lifetime'' -- Lau Tzu
 
-Large-scale Grid computing projects such as TeraGrid, Grid'5000, and
-OpenScience Grid provide researchers access to vast amounts of compute
-resources, but in doing so, require the adaption of their workflows to comply
-to the environments and policies provided by these systems.  In many scenarios,
-user communities benefit from less restrictive grids, where they they have
-flexibility in deploying resources, assigning users, and configuring the
-environment and policies, even if this results in a smaller scale grid.
-However, researchers do not have many alternatives as creating these types of
-systems involves coordination of distributed systems and expertise in
-networking, operating systems, file systems, security, and grid middleware.
-This results in many research groups creating small, in-house compute clusters
-where scheduling is often ad-hoc, potentially limiting effective resource
-utilization.  To address these challenges, we present the ``Grid Appliance.''
-The ``Grid Appliance'' enables researchers to seamlessly deploy and extend
-small and medium scale grids locally and across network domains.  It provides
-researchers the necessary tools to avoid the complexities in traditional grids
-by enabling them to create and manage their own grids rather than rely on grids
-provided by others.  This paper details the design of the ``Grid Appliance''
-and reports on experiences and lessons learned over four years of development
-and deployment involving wide-area grids.
+Large-scale Grid computing projects such as TeraGrid and OpenScience Grid
+provide researchers vast amounts of compute resources but with limited access,
+potentially long job queues, and environments and policies that might require
+changes to a user's work flows. In many scenarios, individual users and
+communities can benefit from less restrictive more ad-hoc grids with
+flexibility in deploying resources, sharing access, and configuring the
+environment, even if this results in a smaller scale grid.
+
+In this paper, we address how small groups can dynamically create and join grid
+infrastructures with emphasis on low administrative overhead.  Our work
+distinguishes itself from other projects with similar goals in three main ways:
+decentralized system configuration, decentralized user access, and web
+interfaces to construct grids.  This paper presents the ``Grid Appliance,''
+originally presented as a tool to create a WOW or Wide Area Overlay Network of
+Virtual Workstations that has developed over the past 6 years into a mature
+system with many users.  This paper presents the architecture of the system,
+lessons learned during the development of WOW to ``Grid Appliance,'' and a case
+study backed by quantitative analysis that verifies the utility of our
+approach.  
 
 \end{abstract}
 
@@ -82,50 +81,55 @@ Grid computing presents opportunities to combine various distributed resources
 together to form powerful computing systems.  Due to the challenges in
 coordinating the organization of grids, researchers typically become members of
 existing grids. However, often times existing grids are limited in terms of
-flexibility and policies provided, and users resort to setting up and managing
-their local resources.  While there is a wealth of grid middleware available,
+flexibility and policies provided, and users resort to creating and managing
+their own local systems.  While there is a wealth of middleware available,
 including resource managers like Condor~\cite{condor0}, Torque
 (PBS)~\cite{torque}, and Sun Grid Engine~\cite{grid_engine}, most researchers
 see the entry barrier to installing and future management of these systems as
 being greater than their usefulness and as a result often times turn to
-inefficient ad-hoc resource discovery and allocation.  Furthermore, Virtual
-machine based "Cloud" computing infrastructure-as-a-service is a promising
-model for hosting small/medium-scale on-demand Grids; however, the challenge
-remains of configuring the cloud middleware that goes within a cloud instance.
-Users may want to tap into the availability of internal cloud resources and/or
-multiple external providers, while still isolating their allocated resources
-from other grids.
+inefficient ad-hoc resource discovery and allocation.
 
-To address these concerns, we have implemented the ``Grid Appliance'' allowing
-users to focus on making use of grids and minimizing their effort in setting up
-and managing the underlying components.  The ``Grid Appliance'' with minimal
-configuration can span from small to medium scale computing grids within a LAN
-and collaboratively across a WAN, including cloud-provided infrastructures.
-This paper details the design of the ``Grid Appliance'', which evolved with
-feedback from experiences with real deployments and users over four years,
-summarizes lessons learned, and presents an evaluation of its ability to deploy
-zero-configuration virtual Grids that seamlessly span across distributed
-resources, including a local cluster and commercial and research cloud
-resources.
+After assembling a local system, users working in the same field or in
+different departments or groups within the same organization may desire to
+combine their individual resources into even larger grids.  Some of the
+resource managers listed early support simple grids, while other individuals
+turn to more complete solutions like the Globus Toolkit~\cite{globus} and
+gLite~\cite{glite}.  These tool sets come with their own challenges that
+require the level of expertise most researchers in fields outside of
+information technology lack.
 
-At the heart of our approach lies a P2P infrastructure based upon a distributed
-hash table (DHT), useful for decentralized organization of the grid.  Peers are
-able to store key, value pairs into the DHT and to query the DHT with a key and
-potentially receive multiple values efficiently.  Potential network asymmetries
-are avoided by all-to-all connectivity provided by the P2P layer.  A virtual
-private network (VPN) builds upon the P2P system to allow unmodified
-applications to run.  Resources are configured through files generated by a Web
-interface, followed by automated interactions involving the DHT or VPN based IP
-multicast.  
+With the advent of cheap on-demand computing through "Cloud" computing by means
+of infrastructure-as-a-service, small computer clusters can grow dynamically
+into much larger systems.  Doing so has demands similar to that of creating a
+distributed grid in particular with emphasis on connectivity and organization.
+This is because the creation of an individual cloud instance for grid computing
+will typically bind it to a specific grid, while the support for dynamic grids
+may be too imposing.
 
-Users can either download pre-configured virtual machine (VM) or cloud images
-or configure their own systems as the core components of the system have been
-packaged into a software repository, enabling appliance for cloud, physical,
-and virtual resources.  Each producing the same result, a ``Grid Appliance.'' A
-preconfigured environment emphasizing user-centricity and trivial installation,
-providing researchers with a plug-and-play tool to create ad-hoc virtual
-compute clusters for their own groups, local or federated.  A graphical
-overview of the system is illustrated in Figure~\ref{fig:appliance}.
+In this paper, we focus on these concerns and present means to support a
+simplified model for the creation of ad-hoc, distributed grids.  We have
+implemented a system supporting these ideas in the ``Grid Appliances,'' which
+as will be demonstrated in this paper, allows users to focus on making use of
+the grids while minimizing their efforts in setting up and managign the
+underlying components.  The core challenges solved by our approach include:
+\begin{itemize}
+\item decentralized directory service for organizing grids,
+\item decentralized job submission,
+\item grid single sign on through web services and interfaces,
+\item sandboxing with network support,
+\item and all-to-all connectivity despite network asymmetries.
+\end{itemize}
+
+Our work furthers the vision began by our earlier work wide-area overlay of
+virtual workstations~\cite{wow} (WOW).  The WOW paper established the use of
+virtualization technologies, primarily virtual networking and virtual machines,
+to support dynamic allocation of additional resources in grids that span wide
+area networks.  In this paper, we extend those ideas to establish means for the
+dynamic creation of a grid with support for security, decentralized access, and
+user-friendly approaches to grid management have many independent groups that
+do not share all resources with members of the grid .  In addition, we present
+several years worth of experience in designing and developing our reference
+implementation, the ``Grid Appliance.''
 
 \begin{figure*}[ht]
 \centering
@@ -138,38 +142,55 @@ scripts, and a user interfaces for the middleware.}
 \label{fig:appliance}
 \end{figure*}
 
-To configure the grid, users and resources interact with a Web interface.  At
-this site, users can create or join group-based grids.  Members of the grid are
-able to create and download configuration files, which plug into the ``Grid
-Appliance'' as a floppy disk or as a file in its file system.  The file
-specifies the type and purpose of the ``Grid Appliance'' instance and uniquely
-identifies the owner.  Upon first boot, an appliance instance contacts the site
-which provided the configuration file to obtain a certificate authority (CA)
-signed certificate, after which the system becomes completely decentralized and
-connects to other systems through the P2P overlay.  
+Our experience derives from the development of the ``Grid Appliance'' and its
+use in several projects.  Of these projects, Archer, a distributed grid for
+computer architecture research spanning 6 seed universities, stands out.
+Archer allows any academic access to contribute and use resources with little
+time overhead.  The users join a website, download a configuration image and a
+virtual machine (VM), and start the VM.  As soon as the VM has completed the
+booting process, the user is connected to a set of distributed resources and
+able to begin submitting and receiving jobs.
 
-To justify our techniques, consider the difficulty in combining resources
-across disparate networks, which may or may not involve multiple research
-groups.  The set up of security, connectivity, and the continuous management of
-the system may require an information technology (IT) expert.  Network
-constraints present another complexity beyond configuration and organization of
-distributed resources.  Contributing groups may have resources behind different
-network address translators (NATs) and firewalls, preventing direct
+At the heart of our approach lies a P2P infrastructure based upon a distributed
+hash table (DHT) useful for decentralized configuration and organization of
+systems.  Peers are able to store key, value pairs into the DHT and to query
+the DHT with a key and potentially receive multiple values efficiently.  The
+original purpose of the DHT was to support a decentralized virtual private
+network (VPN), useful for security, supporting unmodified applications across a
+network overlay, and handling network asymmetries.  The DHT is also used for
+the decentralized coordination of the grid.  Users configure their grid through
+a web interface, which outputs configuration files that can be used with the
+``Grid Appliance.''
+
+The techniques described in this paper have many applications.  At the basis,
+it supports the creation of local grids by simply starting a virtual machine on
+the computers intended for use within the grid.  It allows users to seamlessly
+combine their dedicated grids with external resources such as workstations and
+cloud resources.  The level of familiarity with security, operating systems,
+and networking is minimal as all the configuration details are handled as a
+component of the system.  User interaction with the system focused on two
+aspects configuration of the grid using social networking like group interfaces
+and deployment of virtual machine images.  A graphical overview of the system
+is illustrated in Figure~\ref{fig:appliance}.
+
+To justify our methods, consider the difficulty in combining resources across
+disparate networks, which may or may not involve multiple research groups.  The
+set up of security, connectivity, and the continuous management of the system
+may require an information technology (IT) expert.  Network constraints present
+another complexity beyond configuration and organization of distributed
+resources.  Contributing groups may have resources behind different network
+address translation devices (NATs) and firewalls, preventing direct
 communication with each other.  Even assuming that an institution's network
 administrator is willing to make exceptions for the grid, additional rules may
 be required for each new cluster or resource added internally and externally,
 quickly becoming unmanageable.  Our approach embraces decentralized systems
 behind NATs and novice grid administrators.
 
-The rest of this paper discusses these challenges in more detail and our
-solutions addressing them.  Section~\ref{system} provides an overview of the
-``Grid Appliance'' and the systems involved as well as highlights our core
-design.  In Section~\ref{middleware}, we present a detailed review of available
-grid middleware to address the ambiguity in the previous section.  As described
-in Section~\ref{vpns}, the other key component of the system is a P2P VPN that
-makes created distributed systems significantly more simple.
-Section~\ref{case_study} provides a case study of a grid deployment using
-standard grid deployment techniques compared to our ``Grid Appliance,''
+The rest of the paper is as follows.  Section~\ref{wow} overviews the core
+components of a WOW.  In Section~\ref{architecture}, we describe the key
+features of our approach to creating WOWs that distinguishes them from previous
+work.  Section~\ref{case_study} provides a case study of a grid deployment
+using standard grid deployment techniques compared to our ``Grid Appliance,''
 describing qualitatively  the benefits of this approach.  Using the system
 described in the previous section, Section~\ref{evaluation} presents a
 quantitative evaluation of the time taken to self-configure a ``Grid
@@ -177,6 +198,397 @@ Appliance'' wide-area virtual clusters.  We share our experiences from this
 long running project in Section~\ref{lessons_learned}.  Finally,
 Section~\ref{related_work} compares and contrasts other solutions to these
 problems.
+
+\section{Wide Area Overlay Network of Virtual Workstations}
+
+This section presents an overview of our previous work and the core
+technologies used by the ``Grid Appliance.''  These include the P2P overlay
+software and the VPN and the use of virtual machines in grid computing.  A
+WOW~\cite{wow} combines virtual machines and virtual networking to support
+dynamic sizes of a grid, which recently has been furthered by Abrahams et
+al.~\cite{ipop_cloud} to verify support for extending into the cloud.  This
+section covers the development of WOWs over the years as it relates to our
+other publications and as means to distinguish our contributions in this paper.
+
+\subsection{P2P Overlays}
+
+Peer-to-peer or P2P systems create environments where all members of a system
+are equal.  The key feature of most P2P systems is discovery with additional
+services built on top, such as voice and video with Skype or data sharing with
+BitTorrent.  Many forms of P2P support autonomic features such as self-healing
+and self-optimization with the ability to support decentralized environments.
+As we will show, this makes their application in our system very attractive.
+
+Before further discussion, let us introduce our P2P overlay named
+Brunet~\cite{brunet}, a type of structured overlay.  Structured overlays tend
+to be used to construct distributed hash tables (DHT) and in comparison to
+unstructured overlays provide faster guaranteed search times ($O\log N$
+compared to $O(N)$, where N is the size of the network).  The two most
+successful structured overlays are Kademlia~\cite{kademlia}, commonly used for
+decentralized BitTorrent, and Dynamo~\cite{dynamo}, to support Amazon's web
+site and services.
+
+Brunet support for NAT traversal makes it unique from other structured
+overlays.  Originally in the WOWs~\cite{wow}, Brunet facilitated the dynamic
+connections amongst peers in the grid.  Since then, it has been extended to
+support DHT with atomic operations~\cite{pcgrid}, efficient relays when direct
+NAT traversal fails, ~\cite{groupvpn}, support for network
+disconnectivity~\cite{hpdc08}, and cryptographically secure
+messaging~\cite{groupvpn}.
+
+\subsection{Virtual Private Networks}
+
+A common question with regards to our work is ``why do grids need a VPN?'' The
+two primary issues related to connectivity, the first being the limited address
+space provied by IPv4, which is quickly approaching its limit.  Network address
+translation (NAT) allows more devices to connect to the Internet but at the
+cost of symmetry.  Two machines on different NAT devices or NATs cannot easily
+communicate directly with each other without some assistance.  With the advent
+of IPv6, the situation might improve, but there are no guarantees that NATs
+will disappear nor can users be certain that firewalls will not be in place
+that inhibit symmetry.  A VPN circumvents all these issues, so long as the user
+can connect to the VPN, as all traffic is routed through a successfully
+connected pathway.
+
+The VPN used in the system is called IPOP~\cite{groupvpn, ipop}.  IPOP (IP over
+P2P), as the name implies, builds uses Brunet to route IP messages.  By using
+P2P, maintaining dedicated bootstrap nodes have less overhead, and in fact, our
+approach with IPOP allows an existing Brunet infrastructure to bootstrap
+independent Brunet infrastructures in order to isolate IPOP networks in their
+own environments~\cite{virtual_private_overlays}.
+
+Once IPOP has entered its unique Brunet overlay, it obtains an IP address.  IP
+address reservation and discovery relies on Brunet's DHT.  Each VPN stores its
+P2P identifier into the DHT at the generated by the desired IP address, such
+that the key, value pair is $(hash(IP), P2P)$.  In order to ensure there are no
+conflicts, the storing of this value into the DHT uses an atomic operation,
+which succeeds only if no other peer has stored a value int $hash(IP)$.
+
+The process for creating connections begins when IPOP receives an outgoing
+message.  First it parses the destination address and queries the DHT for the
+remote peers P2P address.  The peer then attempts to form a secure, direct
+connection with the remote peer using Brunet's secure messaging layer.  Once
+that has formed, packets to that IP address are directed over that secure link.
+
+\subsection{Virtual Machines in Grid Computing}
+
+Even further back, we were the first to advocate the use of virtual machines
+(VMs) in grid computing for security and
+customization~\cite{case_for_grid_computing_on_vms}.  In this work and in
+others since~\cite{sandbox, swan, sandbox1}, Qualitatively, VMs have been
+established as means for sandboxing, that is environments that allow untrusted
+users to use trusted resources in a limited fashion.  VMs run as a process on a
+system, where processes running inside the VM have no access to the host
+operating system.  Furthermore, VMs can have limited or no networking access as
+controlled by the host, which effectively seals them in a cage or sandbox
+protecting the hosts environment.  VMs are also useful for customization and
+legacy applications, since a developer can configure the VM and then distribute
+it as an appliance, with the only requirement on the end user being that they
+have a VM software or manager.  Quantitatively, previous work has shown that
+CPU bound tasks perform fairly well running with no more than 10\% overhead and
+in some cases 0\%, which is the case with VMs like Xen.
+
+While not a direct correlation to grid computing, clouds have benefited
+significantly from VMs.  VMs are the magic behind cloud infrastructures that
+provide IaaS or infrastructure-as-a-service, such as EC2.  In these
+environments, users are able to create customized instances inside of cloud
+environments, share with each other, and dynamically create or shutdown them as
+necessary.  While the application of clouds is generic, it can easily be
+applied towards grids.  A user can create push excess jobs into the cloud, when
+their is overflow, high demands, or the user does not want to maintain their
+own hardware.  One challenge, however, is the dynamic creation of a grid as
+well as extension of an existing grid using the cloud, challenges that are
+addressed in this paper.
+
+\section{The ``Grid Appliance'' Architecture}
+\label{architecture}
+
+Our approach attempts to reuse as many available components to design a grid
+middleware by doing so, the idea can then be made generic and then applied to
+other middleware stacks.  As a result, our contribution in this paper focuses
+primarily on a few key tasks:  making grid construction easy, supporting
+decentralized user access, sandboxing the users environment, limiting access to
+the grid to authorized identities, and ensuring priority on users own
+resources.  In this section, we will overview these contributions as we put
+together the pieces of the ``Grid Appliance.''
+
+\subsection{Web Interface and the Community}
+
+Before deploying any software or configuring any hardware, a grid needs to have
+some form of organization.  Who will be responsible for distributing and
+signing certificates, who will be able to join the grid, how will user accounts
+be handled, how can responsibility be delegated.  These are complex questions,
+which might not necessarily have an easy answer.  For less restrictive systems,
+like a collection of academic labs sharing clusters, it might be very easy.
+One of the professors would handle the initial authorization of all the other
+labs and then delegate to them the responsibility of allowing their affiliates,
+such as students and scholars access.
+
+The greater challenge becomes having the professors actually maintaining the
+certificates, having certificate requests properly submitted and handles, and
+having signed certificates placed in the right location.  Our solution to this
+potentially confusing area was a group interface, akin to something like
+Facebook's or Google's groups.  Albeit, those types of groups are not
+heirarchial, our model consists of a two layers, one for access to the grid and
+another to differentiate the various subgroups or delegated responsibility in
+the group.  Once a user has access to a subgroup, they have the ability to
+download the grid configuration data that can be added to a ``Grid Appliance.''
+As will be described later, this data is used to obtain their credentials for
+machines that they use and connect them to the grid.
+
+To give an example, consider our computer architecture grid, Archer.  Archer
+was seeded initially by the University of Florida, so we became the creators of
+the initial Archer grid and are maintainers of that group.  As new universities
+and independent researchers have joined Archer, they request access to the
+``Archer Grid'' group.  Upon receiving approval, they then need to form their
+own subgroup so that they so that they can allow others to connect to the grid.
+To do so, they will create a second layer group called ``Archer for University
+X'' and all members of university X will apply for membership in that group.
+The creator can make decisions to either accept or deny these users.  Once the
+user has access, they will download their configuration data formatted as a
+virtual disk image and the ``Grid Appliance'' VM and start the ``VM.''  After
+starting the VM, the user will be connected to the grid and able to submit and
+receive jobs.
+
+Thus to join a grid a user only ever need to sign onto a web site to download a
+configuration data, which can then be used on multiple systems.  To support
+this process, the configuration data contains cryptographic information that
+enables a user to obtain a signed certificate from the web interface through
+XML-RPC over HTTPS.  This process is handled either by booting the ``Grid
+Appliance'' or restarting a ``Grid Appliance'' service.  The service will
+detect if there is new configuration data, and if there is, it contacts the web
+interface with the cryptographic information and a public key.  The web
+interface verifies the user's identity, retrieves their profile from its
+database and binds that information with the public key to create a certificate
+request, which will then be signed and returned to the user.
+
+With a public web interface, we have been able to create a community of sorts.
+Not necessarily a grid community but a boot strapping community for grids.  A
+single web interface can easily play host to many individual grids but the same
+underlying P2P infrastructure can easily be shared amongst all of them due to
+the unique nature of Brunet to support recursive bootstrapping.  Thus when a
+user comes to our publicly shared interface, they need to only focus on the
+establishment of their VPN and grid services, which has been trivialized to
+accepting or denying users access to a group.  We would like to note that there
+is no need to make an explicit public grid community through the web interface,
+since all ``Grid Appliances'' come with a default configuration file that will
+connect them to an insecure public grid.  
+
+\subsection{The Organization of the Grid}
+
+The previous section focused on the web interface and how it facilitates the
+configuration of the grid and skirted the issues of detailed configuration and
+organization.  The configuration of the grid mirrors that of the connection
+process.  The first tier groups map to a common grid and each grid maps to a
+unique VPN.  Thus when a user creates a new grid group, they actually are
+configuring a new VPN, these details include address range, security
+parameters, user agreements, and the name of the group.  The system provides
+defaults for address range and security parameters, so users can focus on high
+level details like the user agreement and the grid's name.
+
+As mentioned earlier, the second tier of groups configure subgroups within the
+grid and delegate responsibility.  It is also the location that users download
+their configuration data.  Users can download either download a configuration
+data for a submission, worker, or manager node.  Worker nodes strictly run
+jobs.  Submission nodes can run jobs as well as submit jobs into the grid.
+Manager nodes are akin to head nodes, those that manage the interaction between
+worker and submission nodes.
+
+While the configuration details are handled by the web interface and scripts
+inside the ``Grid Appliance,'' organization of the grid, more specifically the
+linking of worker and submission nodes to manager nodes, relies on the DHT.
+Managers store their IP addresses into the DHT at the key \emph{managers}.
+When workers and clients join the grid, they automatically queries this key,
+using the results to configure their grid software.  Managers can also query
+this key to learn of other managers to coordinate with each other.
+
+Our grid composition is largely based upon a desire to support a decentralized
+environment, while still retaining reliability and a strong user base.  As
+there exist many middlewares to support job submission and scheduling, we
+surveyed available and established middleware to determine how well they
+matched our requirements.  Our results are presented in Table~\ref{tab:grid},
+which covers most of the well established middleware and some recent research
+projects focused on decentralized organization.
+
+\begin{table*}[ht]
+\small{
+%\setlength{\itemsep}{1pt}
+%\setlength{\parskip}{1pt}
+\centering
+\begin{tabular}[c]{|p{1.4cm}||p{3.475cm}|p{3.475cm}|p{3.475cm}|p{3.475cm}|} \hline
+& Description & Scalability & Job queue / submission site & API Requirements \\ \hline \hline
+Boinc &
+Volunteer computing, applications ship with Boinc and poll head node for data
+sets &
+Not explicitly mentioned, limited by the ability of the scheduler to handle
+the demands of the client &
+Each application has a different site, no separation from job queue and
+submission site &
+Applications are bundled with Boinc and must be written to use the Boinc API
+in order to retrieve data sets and submit results to the head node
+\\ \hline
+BonjourGrid &
+Desktop grid, use zeroconf / Bonjour to find available resources in a LAN &
+No bounds tested, limits include multicasting overheads and processing power
+of job queue node &
+Each user has their own job queue / submission site &
+None \\ \hline
+Condor &
+High throughput computing / on demand / desktop / etc / general grid computing &
+Over 10,000$^{1}$ &
+Global job queue, no limit on submission sites, submission site communicates directly with worker nodes &
+Optional API to support job migration and check pointing \\ \hline
+PastryGrid &
+Use structured overlay Pastry to form decentralized grids &
+Decentralized, single node limited by its processing power, though
+collectively limited by the Pastry DHT &
+Each connected peer maintains its own job queue and submission site &
+None \\ \hline
+PBS / Torque~\cite{torque} &
+Traditional approach to dedicated grid computing &
+up to 20,000 CPUs$^{2}$ &
+Global job queue and submission site &
+None
+\\ \hline
+SGE &
+Traditional approach to dedicated grid computing &
+Tested up to 63,000 cores on almost 4,000 hosts$^{3}$ &
+Global job queue and submission site &
+None
+\\ \hline
+XtremWeb &
+Desktop grid, similar to Condor but uses pull instead of push, like Boinc &
+Not explicitly mentioned, limited by the ability of the scheduler to handle
+the demands of clients &
+Global job queue, separate submission site, optionally one per user &
+No built-in support for shared file systems
+\\ \hline
+\end{tabular}
+\caption{Grid Middleware Comparison}
+\label{tab:grid}
+}
+\end{table*}
+
+\addtocounter{footnote}{1}
+\footnotetext[\value{footnote}]{\url{http://www.cs.wisc.edu/condor/CondorWeek2009/condor\_presentations/sfiligoi-Condor\_WAN\_scalability.pdf}}
+\addtocounter{footnote}{1}
+\footnotetext[\value{footnote}]{\url{http://www.clusterresources.com/docs/211}}
+\addtocounter{footnote}{1}
+\footnotetext[\value{footnote}]{\url{http://www.sun.com/offers/docs/Extreme\_Scalability\_SGE.pdf}}
+
+Of the resource management middlewares surveyed, Condor matched closest with
+our goals due to its decentralized properties and focus on desktop grids.  In
+particular, with Condor, we are able to have multiple submission points,
+something that would not be trivial to implement in other systems.
+Additionally, adding resources to Condor can be done without any configuration
+from the managers.  Conversely, in SGE and Torque, after resources have been
+added into the system, the user must manually configure the manager to control
+them.  Another aspect that makes Condor a reasonable choice is its support for
+opportunistic cycles.  Most scheduling software assumes that resources are
+dedicated and do not handle cases, where other processors or a user also
+interact with the system.  Condor, however, can detect the presence of other
+processes or a user and suspend, migrate, or terminate a job.  All things are
+not perfect with Condor though, it does require manager nodes, whereas having
+no manager node would be ideal.
+
+While the requirement of having a central manager may be concerning, the
+overhead of running one is small and Condor supports the ability to run many in
+parallel through the use of ``flocking~\cite{flocking}.'' Flocking allows
+submission sites to connect to multiple managers.  This serves two purposes: 1)
+to provide transparent reliability by supporting multiple managers and 2) users
+can share their resources through their own manager.  Flocking allows each site
+to run its own manager or share the common manager.  Additionally a manager can
+easily be setup on a VM, run in the background, and forgotten.
+
+To configure Condor, manager IP addresses are stored into the DHT using the key
+\emph{managers}.  When new peers join, they query the DHT, obtains the list of
+all managers, and randomly selects one as its primary manager.  The rest are
+set to flocking.  If the system prefers managers from its group, it will
+randomly contact each manager in an attempt to find a match, selecting one at
+random if no match is found.  If no managers are found, the process repeats
+every 60 seconds.  Once a manager has been found, it is checked every 10
+minutes to ensure it is online and additional managers that have come online
+are added to the flock list.
+
+\subsection{Sandboxing Resources}
+
+As tasks can run on worker and potentially submission nodes, we have devised
+means to sandbox the environments that do not limit user interactions with the
+system.  While more traditional approaches to sandboxing emphasize a separation
+between worker and submission machine, in our deployments, very few users
+explicitly deploy worker machines, most are submission machines.  Thus we
+developed our sandboxing techniques to limit the ability of submitted jobs on
+systems that are simulataneously being used for submission.  So our sandboxing
+technique considers more than just locking down the machine but also ensuring a
+reasonable level of access.
+
+The core of our sandboxing approach is to limit attacks to software in the
+system and not poorly configured user space, such as poorly chosen passwords or
+resources external to the ``Grid Appliance.''  All jobs are run as a set of
+predefined user identities.  When the jobs are finished executing, whether
+forcibly shutdown or completed successfully, all processes from that user are
+shutdown, preventing malicious trojan attacks.  Those users only have access to
+the working directory for the job and those with permission for everybody.
+Escalation of privilege attacks due to poor passwords are prevented by
+disallowing use of ``su'' or ``sudo'' for these users.  Finally, network access
+is limited to the VPN, thus they are unable to perform denial of service
+attacks on the Internet.
+
+Additionally, systems can be configured such that the only network presented to
+them is that of the virtual network.  To suppor this, IPOP has been enhanced to
+support a router mode, which can be bridged to a virtual machine adapter
+running on the host machine that connects to the network device running inside
+the VM.  Not only does this improve performance, due to reduced I/O overhead,
+the same virtual network router can be used for multiple VMs.
+
+To ensure that submit machines still have a high level of functionality without
+risking the system to external attacks even from users on the same network,
+user services are run only on a ``host-only'' network device within the virtual
+machine.  This includes an SSH server and a Samba or Windows File Share.  The
+user name matches that from the website, while the password defaults to
+``password.''  We would like to note that file sharing services work the
+opposite to that of host to guest as most VMs already have in place.  Instead
+users can access their files on the VM from the host.  This was done to limit
+potential attacks on submission machine.
+
+\section{User Experience}
+
+The previous section covered aspects of the architecture important to
+administrators.  This section concludes the core architecture by focusing on
+those features important to users.  This includes components to make the
+environment more desktop grid friendly and better support for decentralized
+task submission.
+
+\subsection{Respecting Host Usage in a Desktop Grid}
+
+In desktop computing grids, a grid resource may duplicate as a workstation
+directly used by individuals.  If the grid software runs in a VM, for sand
+boxing purposes, it will be unable to detect an active user on the host.  In
+the ``Grid Appliance'', this is addressed by running a light-weight agent on
+the host that communicates to the VM through the second Ethernet interface.
+The agent discovers a VM through multicast service discovery executed only on
+"host-only" virtual network devices.  When a user accesses the host, the agent
+notifies a service in the VM, which results in running tasks being suspended,
+migrated, or terminated.  The machine remains off limits until there has been
+no user activity for 10 minutes.
+
+\subsection{Decentralized Submission of Jobs}
+
+While grid middlewares typically provide data distribution mechanisms, these
+can be clunky, requiring that the entire file be distributed to each worker.
+This can be an inconvenience if only a small portion of the file is required,
+which is particularly true with disk images used by computer architecture
+simulations.  To support sparse data transfers, each ``Grid Appliance'' has a
+local NFS share exported with read-only permission.  There still exists that
+challenge that traditionally in a Unix system a file systems must be manually
+mounted.  Fortunately, there exist tools to automatically mount file systems,
+e.g.  autofs. The autofs tools work by intercepting file system calls inside a
+specific directory, parsing the directory link, and mounting a remote file
+system.  In the ``Grid Appliance,'' accessing the path
+\url{/mnt/ganfs/hostname}, where hostname is either the IP address or hostname
+of an appliance, will automatically that appliance's NFS export without the
+need for super-user intervention.  Mounts are automatically unmounted after a
+sufficient period of time without any access to the mounted file system.  
 
 \section{The ``Grid Appliance'': From a User's Standpoint}
 \label{system}
@@ -285,200 +697,6 @@ available managers by querying the DHT, step ``3,'' and then the managers
 directly, step ``4.''  The technical details for our approach with Condor are
 described in Section~\ref{condor}.
 
-\subsection{Improving User Experience}
-
-Once client machines connect to a grid, the user can submit tasks and receive
-tasks submitted by others.  The remaining considerations focus on user access,
-addressing questions including: how do users easily move files across the grid
-or into their local machine?  If a user runs a client in a virtual machine on
-their desktop, how can the client be informed to refuse running jobs, while the
-user is on the desktop?
-
-Systems like these have many potential security issues requiring an approach
-that balances usability with security.  Our approach creates a sandbox.  The
-system is secure to the degree that the only viable attacks are those directly
-against the software running on the machine and not poorly chosen passwords or
-external resources To do so, grid tasks are severely limited in their
-capabilities.  File system access is limited files and directories with
-permissions for everybody and that specific user.  Escalation of privilege
-attacks due to poor passwords are prevented by disallowing use of ``su'' or
-``sudo.'' Finally, network access is limited to the VPN, thus they are unable
-to perform denial of service attacks on the Internet.
-
-User services include a SSH server and a Samba or Windows File Share with the
-user name set to that of the name on the group website and the password
-``password.'' While most VMs mount the hosts file system inside the VM, the
-``Grid Appliance'' does the opposite and exports a Samba share.  This is done
-to limit potential attacks on users' personal data.  These services are secured
-by limiting access to them to "host-only" and LAN access.  To ensure this,
-these applications do not bind to the first network interface, which is used to
-connect to the Internet, nor does it bind to the VPN interface.  Instead, they
-are bound to a second Ethernet interface, when present.  This interface is
-expected to be connect to "host-only" in the VM world or a private LAN in a
-cluster.  
-
-In desktop computing grids, a grid resource may duplicate as a workstation
-directly used by individuals.  If the grid software runs in a VM, for sand
-boxing purposes, it will be unable to detect an active user on the host.  In
-the ``Grid Appliance'', this is addressed by running a light-weight agent on
-the host that communicates to the VM through the second Ethernet interface.
-The agent discovers a VM through multicast service discovery executed only on
-"host-only" virtual network devices.  When a user accesses the host, the agent
-notifies a service in the VM, which results in running tasks being suspended,
-migrated, or terminated.  The machine remains off limits until there has been
-no user activity for 10 minutes.
-
-While grid middlewares typically provide data distribution mechanisms, these
-can be clunky, requiring that the entire file be distributed to each worker.
-This can be an inconvenience if only a small portion of the file is required,
-which is particularly true with disk images used by computer architecture
-simulations.  To support sparse data transfers, each ``Grid Appliance'' has a
-local NFS share exported with read-only permission.  There still exists that
-challenge that traditionally in a Unix system a file systems must be manually
-mounted.  Fortunately, there exist tools to automatically mount file systems,
-e.g.  autofs. The autofs tools work by intercepting file system calls inside a
-specific directory, parsing the directory link, and mounting a remote file
-system.  In the ``Grid Appliance,'' accessing the path
-\url{/mnt/ganfs/hostname}, where hostname is either the IP address or hostname
-of an appliance, will automatically that appliance's NFS export without the
-need for super-user intervention.  Mounts are automatically unmounted after a
-sufficient period of time without any access to the mounted file system.  
-
-\section{Grid Middleware}
-\label{middleware}
-
-Grid middleware connects various distributed resources together in order to run
-computing tasks.  These type of systems include resource management systems
-like Torque, Condor, and Oracle / Sun Grid Engine (SGE), which consist of three
-fundamental components: execute nodes, resource managers, and submission nodes.
-Users access a submission site, craft task description files, and submit them
-to a scheduler or resource manager, which will queue tasks to the various
-execute nodes to run when available.
-
-\subsection{A Survey of Grid Middleware}
-
-Issues that arise when configuring grids include: how will users connect to
-resources, who will be able to submit jobs, where will the job queue be
-located, how can priority be given to local users, how large can the grid
-become, and what if any changes will the user need to make to their software to
-run it on the grid.  In Table~\ref{tab:grid}, we compare both popular grid
-solutions with recent research projects like BonjourGrid~\cite{bonjourgrid} and
-PastryGrid~\cite{pastrygrid} that are aimed at resolving some of the more
-challenging issues regarding coordination.
-
-\begin{table*}[ht]
-\small{
-%\setlength{\itemsep}{1pt}
-%\setlength{\parskip}{1pt}
-\centering
-\begin{tabular}[c]{|p{1.4cm}||p{3.475cm}|p{3.475cm}|p{3.475cm}|p{3.475cm}|} \hline
-& Description & Scalability & Job queue / submission site & API Requirements \\ \hline \hline
-Boinc &
-Volunteer computing, applications ship with Boinc and poll head node for data
-sets &
-Not explicitly mentioned, limited by the ability of the scheduler to handle
-the demands of the client &
-Each application has a different site, no separation from job queue and
-submission site &
-Applications are bundled with Boinc and must be written to use the Boinc API
-in order to retrieve data sets and submit results to the head node
-\\ \hline
-BonjourGrid &
-Desktop grid, use zeroconf / Bonjour to find available resources in a LAN &
-No bounds tested, limits include multicasting overheads and processing power
-of job queue node &
-Each user has their own job queue / submission site &
-None \\ \hline
-Condor &
-High throughput computing / on demand / desktop / etc / general grid computing &
-Over 10,000$^{1}$ &
-Global job queue, no limit on submission sites, submission site communicates directly with worker nodes &
-Optional API to support job migration and check pointing \\ \hline
-PastryGrid &
-Use structured overlay Pastry to form decentralized grids &
-Decentralized, single node limited by its processing power, though
-collectively limited by the Pastry DHT &
-Each connected peer maintains its own job queue and submission site &
-None \\ \hline
-PBS / Torque~\cite{torque} &
-Traditional approach to dedicated grid computing &
-up to 20,000 CPUs$^{2}$ &
-Global job queue and submission site &
-None
-\\ \hline
-SGE &
-Traditional approach to dedicated grid computing &
-Tested up to 63,000 cores on almost 4,000 hosts$^{3}$ &
-Global job queue and submission site &
-None
-\\ \hline
-XtremWeb &
-Desktop grid, similar to Condor but uses pull instead of push, like Boinc &
-Not explicitly mentioned, limited by the ability of the scheduler to handle
-the demands of clients &
-Global job queue, separate submission site, optionally one per user &
-No built-in support for shared file systems
-\\ \hline
-\end{tabular}
-\caption{Grid Middleware Comparison}
-\label{tab:grid}
-}
-\end{table*}
-
-Many grids are configured to have a single site for job submission, such that
-all users of the system, both local and remote, must have direct access to the
-submission site.  Each user will be allocated a unique account for their use
-with the ability to execute programs and store files.  The process requires an
-administrator to create an account with the assumption that the user can be
-trusted.  Because malicious users could run applications to escalates
-privileges, distribute copyrighted materials, or interfere with others' use of
-the grid.  The ``Grid Appliance'' can be used to provide individual submission
-sites, thereby limiting a their direct access in the grid limited to their own
-sites.
-
-Having a single job queue can lead to unfair sharing of resources, for example,
-consider a multi-site grid with a single job queue.  If the managers of the job
-queue were in dire need for resources, they could manipulate the system in
-order to obtain higher priority on all resources, abusing their power and
-obtaining an unfair portion of all grid resources.  Users and groups that
-provide resources should have high priority on them, otherwise their
-motivation for sharing would be limited.  Not dealing with these issues could
-inevitably lead to a fractured grid, as many users may desire a simpler setup,
-where there is no concern about ensuring priority on their own resources.
-Furthermore, when grids are financed by third parties, the third parties like
-to receive statistics about their use, if a member of a grid were to remove
-their resources every time a local user needed them, those results would not be
-recorded nor available to the third party.  The ``Grid Appliance'' approach
-makes it easy to have a common job queue but also to support multiple job
-queues in more adversarial environments.
-
-While its not particularly common, some systems, like Boinc, require that a
-user wishing to deploy tasks on a grid compile their software using particular
-APIs.  Some, like Condor, provide optional APIs to provide extended features
-like process check-pointing and migration.  Having firm requirements that force
-users to write specialized code may work for certain environments, but doing so
-increases the entry barrier and may provide too much challenge for courses in
-grid computing.  Having optional requirements, lets dedicated users take
-advantage of special features without affecting the use of less complex tasks.
-
-\addtocounter{footnote}{1}
-\footnotetext[\value{footnote}]{\url{http://www.cs.wisc.edu/condor/CondorWeek2009/condor\_presentations/sfiligoi-Condor\_WAN\_scalability.pdf}}
-\addtocounter{footnote}{1}
-\footnotetext[\value{footnote}]{\url{http://www.clusterresources.com/docs/211}}
-\addtocounter{footnote}{1}
-\footnotetext[\value{footnote}]{\url{http://www.sun.com/offers/docs/Extreme\_Scalability\_SGE.pdf}}
-
-\begin{figure*}[h!t!]
-\centering
-\epsfig{file=figs/NAT.eps, width=5in}
-\caption{A typical NAT interaction. The peer behind a NAT has a private address.
-When the packet is sent through the NAT, the NAT translates the source information
-into a public mapping, keeping the original source information so that if a
-packet from the remote peer comes back, it can be translated and delivered to
-the original source.}
-\label{fig:nat}
-\end{figure*}
-
 Considering these three issues:  submission site, job queue site, and API
 requirements, we firmly believe that out of the potential choices Condor
 matches best.  While systems like PastryGrid and BonjourGrid are developing
@@ -491,103 +709,8 @@ could potentially enable them to meet our goals, we believe the end result is
 too complex.  Boinc is inappropriate for our approach as it works best when
 used to facilitate a single project from a central point.
 
-\subsection{Configuring Grid Middleware through the DHT}
-\label{condor}
-
-To efficiently and transparently construct wide area grids, we employ a DHT.  A
-manager places its IP address into the DHT at the key \emph{managers}.  When
-workers and clients join the grid, the systems automatically queries this key,
-and using the results to configure the grid software.  Managers can also query
-this key to learn of other managers to coordinate with each other.
-
-Of the resource management middlewares that we have surveyed, Condor matched
-closest with our goals due to its decentralized properties and focus on desktop
-grids.  Additionally, our approach allows the use of Condor for voluntary
-computing projects.  As described above, most of the available cluster and grid
-software do not easily support multiple submit points, in fact, most require
-another piece of software to bridge the gap between cluster and grid, or more
-explicitly distribution of the system.
-
-Further motivating Condor is the ease in adding new resources.  To add new
-resources to a Condor system, an execute or submission node must have the IP
-address for the manager, the rest of the system organization is performed
-entirely transparent to the user.  Conversely, in SGE and Torque, after
-resources have been added into the system, the user must manually configure the
-manager to control them.
-
-Finally, Condor supports opportunistic cycles.  Most scheduling software
-assumes that resources are dedicated and do not handle cases, where other
-processors or a user also interact with the system.  Condor, however, can
-detect the presence of other processes or a user and suspend, migrate, or
-terminate a job.
-
-A caveat to our approach is the requirement of a manager, while the system
-organizes through a decentralized means, it still results in a distributed
-system relying heavily on dedicated manager resources.  For future work, we are
-investigating means to completely decentralized the manager node, potentially
-by making each node a manager for its own node and through decentralized
-resource discovery and priority ranking algorithms.  In the meantime, we have
-taken advantage of a feature known as ``flocking'' in Condor.  Flocking allows
-submission sites to connect to multiple managers.  This serves two purposes: 1)
-to provide transparent reliability by supporting multiple managers and 2) users
-can share their resources through their own manager.  
-
-To configure Condor, we store managers IP addresses into the DHT using the key
-\emph{managers}.  When a new peer joins, it queries the DHT, obtains the list
-of all managers, and randomly selects one as its primary manager.  The rest are
-set to flocking.  If the system prefers managers from its group, it will
-randomly contact each manager in an attempt to find a match, selecting one at
-random if no match is found.  If no managers are found, the process repeats
-every 60 seconds.  Once a manager has been found, it is checked every 10
-minutes to ensure it is online and additional managers that have come online
-are added to the flock list.
-
 \section{The Motivation for VPNs}
 \label{vpns}
-
-As of 2010, a majority of the Internet is connected via Internet Protocol (IP)
-version 4, which is quickly approaching its limit of available addresses,
-$2^{32}$ (approximately 4 billion).  With the Earth's population at over 6.8
-billion and each individual potentially having multiple devices with Internet
-connectivity, the IPv4 limitation is becoming more and more apparent.  There
-are two approaches to addressing this issue:  1) the use of NATs to enable many
-machines and devices to share a single IP address but preventing bidirectional
-connection initiation, and 2) IPv6 which supports $2^{128}$ addresses.  The use
-of NATs, as shown in Figure~\ref{fig:nat}, complicates grid systems that
-require all-to-all communication, which include all of those which we consider.
-In addition, firewalls may prevent peers from receiving incoming connections.
-And while the eventual widespread use IPv6 may eliminate the need for address
-translation, it does not deal with the issue of firewalls, and the future of
-NATs in IPv6 is unclear.
-
-The use of VPNs motivates beyond the impetus for traversing NATs and firewalls.
-With a VPN, users can avoid the headaches associated with dynamic IP addresses,
-as each VPN instance can claim and maintain a globally unique IP address and,
-regardless of the machines physical location and mobility, ideal condition for
-laptop users.  In addition, it abstracts the user from having to be concerned
-about network addresses.  For example, when using machines across networks or
-even a virtual machines inside the same LAN but behind virtual machine manager
-NATs, users must be wary of all nodes in the systems ability to connect with
-each other.  When using a VPN, these considerations are unwarranted, the grid
-software need only concern itself of the VPN and the direct connectivity
-provided through it.
-
-Our work relies on a group enabled IPOP VPN called GroupVPN~\cite{groupvpn}.
-GroupVPN extends IPOP by using the ``GroupVPN'' Web interface to configure
-VPNs.  IPOP through its underlying P2P infrastructure supports NAT traversal
-allowing peers behind NATs and firewalls to communicate directly and indirectly
-through relays in the P2P system.  The VPN enables many of the key features in
-the ``Grid Appliance.'' For example, if there were not a VPN, users of MPI and
-Hadoop would need to ensure that all resources were bridged to the LAN and not
-through a VM NAT, the typical configuration, otherwise the multicast message
-would not be delivered to all participants.  The VPN software supports the
-ability to self-organize using existing infrastructures including IP multicast,
-public overlays, and Xmpp as described in our previous
-work~\cite{bootstrapping}.  This is in contrast to other VPNs like
-Hamachi~\cite{hamachi}, OpenVPN~\cite{openvpn}, Tinc~\cite{tinc},
-Violin~\cite{violin}, ViNe~\cite{vine}, or VNET~\cite{vnet}, that are either
-centralized and require a dedicated node to coordinate peers or decentralized
-solutions that require manual configuration of links between peers.
 
 Using the aforementioned techniques ``Grid Appliances'' can be constructed in
 one of two ways: local and wide area.  The ``Grid Appliance'' ships with two
@@ -837,8 +960,8 @@ speed at which connectivity occurs.
 \section{Lessons Learned}
 \label{lessons_learned}
 
-In this section, we will present some of our previous experiences in using and
-developing the Grid Appliance that were not obvious when we started.  A
+This section highlights some of the more interesting developments and
+experiences we have had that did not fit in the topics discussed so far.  A
 significant component of our experience stems from the computational grid
 provided by Archer~\cite{archer}, an active grid deployed for computer
 architecture research, which has been online for over 3 years.  Archer
@@ -1101,6 +1224,13 @@ interested in constructing similar systems.  Those interested are able to test
 drive the system by coming to our public Web interface at the
 \url{www.grid-appliance.org}.  Where they can either use our public testing
 grid or deploy their own.
+
+~\footnote{More traditional
+approaches to grids have an entity known as a virtual organization that allows
+sharing of resources to only select members of a grid.  For simplicity
+purposes, our focus has been to have a flat layout, where there exists a single
+virtual organization maps to the entire grid.  Though this does not preclude the
+techniques in this paper to be used in environments where this is not the case.}
 
 For future work, there are many interesting avenues to persue.  The ``Group
 Appliance'' can be extended to support certificate chaining, so that users
