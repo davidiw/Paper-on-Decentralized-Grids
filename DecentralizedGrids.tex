@@ -1,4 +1,7 @@
-\documentclass{sig-alternate}
+\RequirePackage{fix-cm}
+\documentclass[twocolumn]{svjour3}
+\smartqed
+
 
 \usepackage{url}
 \usepackage{multirow}
@@ -31,22 +34,38 @@
 
 \begin{document}
 
-\conferenceinfo{HPDC'11,} {June 8--11, 2011, San Jose, California, USA.}
-\CopyrightYear{2011}
-\crdata{978-1-4503-0552-5/11/06}
 \clubpenalty=10000
 \widowpenalty = 10000
 
 \title{Experiences with Self-Organizing, Decentralized Grids Using the Grid
 Appliance}
 
-\numberofauthors{1}
 \author{
-\alignauthor
-David Isaac Wolinsky and Renato Figueiredo\\
-       \affaddr{University of Florida}\\
-       \email{(davidiw,renato)@acis.ufl.edu}
+David Isaac Wolinsky \and
+Panoat Chuchaisri \and
+Kyungyong Lee \and \\
+Renato Figueiredo
 }
+
+\institute{
+  D. Wolinsky \at
+  Yale Univeristy \\
+  \email{david.wolinsky@yale.edu}
+  \and
+  P. Chuchaisri \at
+  University of Florida \\
+  \email{pchuchai@cise.ufl.edu}
+  \and
+  K. Lee \at
+  University of Florida \\
+  \email{klee@acis.ufl.edu}
+  \and
+  R. Figueiredo \at
+  University of Florida \\
+  \email{renato@acis.ufl.edu}
+}
+
+\date{Received: date / Accepted: date}
 
 \maketitle
 
@@ -80,11 +99,9 @@ architectural description, this paper contains lessons learned during the
 development and deployment of ``Grid Appliance'' systems and a case study
 backed by quantitative analysis that verifies the utility of our approach.  
 
-\end{abstract}
-
-\category{C.2.4}{Computer-Communication Networks}{Distributed Systems}[Distributed applications]
-\terms{Design}
 \keywords{Grid, Cloud, P2P Grid}
+
+\end{abstract}
 
 \section{Introduction}
 
@@ -109,15 +126,19 @@ Infrastructure-as-a-Service ``clouds'', new opportunities for user-deployed
 grids have arisen; where, for example, a small local computer cluster can be
 complemented by dynamically provisioned resources that run ``cloud-burst''
 workloads.  However, while cloud-provisioned resources solve the problem of
-on-demand instantiation, the problem of how to {\em configure} these resources
-to seamlessly and securely integrate with one's infrastructure remains a
-challenge.  In particular, considering that users may provision resources from
-multiple IaaS providers, the configuration demands are similar to
-a distributed grid: while a cloud image can be encapsulated with a grid
-computing stack, it still needs configuration in terms of allocating and
-distributing the appropriate certificates, network configuration to establish
-end-to-end connectivity, and proper configuration of the middleware to
-establish worker, submit, and scheduler nodes.  
+on-demand instantiation, configuring resources to to seamlessly and securely
+integrate with one's infrastructure remains a challenge.  In particular, users
+may provision resources from multiple IaaS providers as well as their own local
+resources in order to avoid relying on one particular vendor, a painful lesson
+learned by those using Amazon's EC2 exclusively on April 21, 2011
+\footnote{\url{http://money.cnn.com/2011/04/21/technology/amazon_server_outage/index.htm}}.
+A well balanced approach to avoid these types of dependencies results in a
+system with similar configuration demands to that of a distributed grid: while
+a cloud image can be encapsulated with a grid computing stack, it still needs
+configuration in terms of allocating and distributing the appropriate
+certificates, network configuration to establish end-to-end connectivity, and
+proper configuration of the middleware to establish worker, submit, and
+scheduler nodes.  
 
 In this paper, we present techniques that reduce the entry barrier in terms of
 necessary expertise and time investment in deploying and extending ad hoc,
@@ -126,6 +147,7 @@ supporting these ideas in the ``Grid Appliance,'' which as will be
 demonstrated, allows users to focus on making use of a grid while minimizing
 their efforts in setting up and managing the underlying components.  The core
 challenges solved by our approach include:
+
 \begin{itemize}
 \item decentralized directory service for organizing grids,
 \item decentralized job submission,
@@ -133,6 +155,11 @@ challenges solved by our approach include:
 \item sandboxing with network support,
 \item and all-to-all connectivity despite network asymmetries.
 \end{itemize}
+
+As an extension to our previous work~\cite{hpdc11}, this paper presents updates
+to the preceding topics, additional lessons learned, and a discussion on the
+use of the ``Grid Appliance'' as a utility for ondemand construction of
+parallel job environments.
 
 \begin{figure}[ht]
 \centering
@@ -147,19 +174,29 @@ available in the P2P network.}
 
 The ``Grid Appliance'' project and concepts have been actively developed and
 used in several projects for the past six years.  Of these projects, Archer, a
-distributed grid for computer architecture research,
-has demonstrated the feasibility and utility of this approach by
-deploying a shared collaborative infrastructure spanning clusters across six US
-universities, where the majority of the nodes are constrained by network
-address translation (NAT).  Every resource in Archer is configured in the same,
-simple manner:  by deploying a ``Grid Appliance'' that self-configures to join a
-wide-area grid.  Researchers interested or desiring the ability to access both
-grid resources and specialized commercial simulation tools (such as Simics) can
-easily use and contribute resources from this shared pool with little effort
-by joining a website, downloading a configuration image and a virtual
-machine (VM), and starting the VM inside a VM manager (VMM).  Upon completion of
-the booting process, users are connected to the grid and able to submit and
-receive jobs.
+distributed grid for computer architecture research, has demonstrated the
+feasibility and utility of this approach by deploying a shared collaborative
+infrastructure spanning clusters across six US universities, where the majority
+of the nodes are constrained by network address translation (NAT).  Every
+resource in Archer is configured in the same, simple manner:  by deploying a
+``Grid Appliance'' that self-configures to join a wide-area grid.  Researchers
+interested or desiring the ability to access both grid resources and
+specialized commercial simulation tools (such as Simics) can easily use and
+contribute resources from this shared pool with little effort by joining a
+website, downloading a configuration image and a virtual machine (VM), and
+starting the VM inside a VM manager (VMM).  Upon completion of the booting
+process, users are connected to the grid and able to submit and receive jobs.
+
+The ``Grid Appliance'' has more recently been used as an academic tool for
+exploring parallel computing through the Future Grid project.  MPI (Messaging
+Passing Interface) and Hadoop are excellent utilities for solving problems
+using parallel computation and as potential research avenues; however,
+configuration and resource requirements present challenges that may limit
+experiences with these tools.  To address this, we have designed a
+self-configuring environment for deploying parallel environments for use within
+the ``Grid Appliance.'' By incorporating the system into Future Grid, users can
+easily deploy their MPI and Hadoop clusters allowing them to focus on user
+interaction with these systems as opposed to management issues.
 
 At the heart of our approach lies a P2P infrastructure based upon a distributed
 hash table (DHT) useful for decentralized configuration and organization of
@@ -207,16 +244,16 @@ problems.
 \section{WOWs}
 \label{wow}
 
-This work furthers the vision began by our earlier work wide-area overlay of
-virtual workstations~\cite{wow} (WOW).  The WOW paper established the use of
-virtualization technologies, primarily virtual networking and virtual machines,
-to support dynamic allocation of additional resources in grids that span wide
-area networks.  For reference, the extensions made in this paper to the WOW
-concept are means for the dynamic creation of grids with support for security,
-decentralized access, and user-friendly approaches to grid management.  This
-section covers the development of WOWs over the years as it relates to our
-other publications and as means to distinguish the contributions made in this
-paper.
+This work furthers the vision began by our earlier concepts on wide-area
+overlays of virtual workstations~\cite{wow} (WOW).  The WOW paper established
+the use of virtualization technologies, primarily virtual networking and
+virtual machines, to support dynamic allocation of additional resources in
+grids that span wide area networks.  For reference, the extensions made in this
+paper to the WOW concept are means for the dynamic creation of grids with
+support for security, decentralized access, and user-friendly approaches to
+grid management.  This section covers the development of WOWs over the years as
+it relates to our other publications and as means to distinguish the
+contributions made in this paper.
 
 \subsection{P2P Overlays}
 
@@ -227,21 +264,24 @@ BitTorrent.  Many forms of P2P have autonomic features such as self-healing
 and self-optimization with the ability to support decentralized environments.
 As we will show, this makes their application in our system very attractive.
 
-For the ``Grid Applianc,'' we have chosen to use Brunet~\cite{brunet}, a type
-of structured overlay.  Structured overlays tend to be used to construct
+For the ``Grid Appliance,'' we make use of Brunet~\cite{brunet}, a type of
+structured overlay.  Structured overlays tend to be used to construct
 distributed hash tables (DHT) and in comparison to unstructured overlays
 provide faster guaranteed search times ($O(\log N)$ compared to $O(N)$, where N
 is the size of the network).  The two most successful structured overlays are
 Kademlia~\cite{kademlia}, commonly used for decentralized BitTorrent, and
-Dynamo~\cite{dynamo}, to support Amazon's web site and services.
+Dynamo~\cite{dynamo}, to support Amazon's web site and services, while another
+two, Chord~\cite{chord} and Pastry~\cite{pastry}, dominate academic
+proceedings.
 
-Brunet support for NAT traversal makes it unique from other structured
-overlays.  Originally in the WOWs~\cite{wow}, Brunet facilitated the dynamic
-connections amongst peers in the grid.  Since then, it has been extended to
-support DHT with atomic operations~\cite{pcgrid07}, efficient relays when
-direct NAT traversal fails~\cite{groupvpn}, resilient overlay structure and
-routing~\cite{hpdc08_0}, and cryptographically secure
-messaging~\cite{groupvpn}.
+Brunet's support for NAT traversal and seamless
+bootstrapping~\cite{bootstrapping} distinguishes it from other structured
+overlays.  In WOWs~\cite{wow}, Brunet facilitated dynamic IP links amongst
+peers in the grid.  Since then, it has been extended to support DHT with atomic
+operations for decentralized DHCP (Dynamic Host Configuration
+Protocol)~\cite{pcgrid07}, efficient relays when direct NAT traversal
+fails~\cite{groupvpn}, resilient overlay structure and routing~\cite{hpdc08_0},
+and cryptographically secure messaging~\cite{groupvpn}.
 
 \subsection{Virtual Private Networks}
 
@@ -258,12 +298,12 @@ traffic is routed through a successfully connected pathway.
 
 The problem with traditional VPN approaches is management overhead including
 maintaining resources on public IP addresses and establishing links amongst
-members in the VPN.  The VPN used in the system is called IPOP~\cite{groupvpn,
-ipop}.  IPOP (IP over P2P), as the name implies, uses a P2P overlay (Brunet) to
-route IP messages.  By using P2P, maintaining dedicated bootstrap nodes have
-less overhead, our approach with IPOP allows an existing Brunet infrastructure
-to bootstrap independent Brunet infrastructures in order to isolate IPOP
-networks in their own environments~\cite{bootstrapping}.
+members in the VPN.  The VPN used in the system is called
+IPOP~\cite{groupvpn,ipop}.  IPOP (IP over P2P), as the name implies, uses a P2P
+overlay (Brunet) to route IP messages.  By using P2P, maintaining dedicated
+bootstrap nodes have less overhead, our approach with IPOP allows an existing
+Brunet infrastructure to bootstrap independent Brunet infrastructures in order
+to isolate IPOP networks in their own environments~\cite{bootstrapping}.
 
 Once IPOP has entered its unique Brunet overlay, it obtains an IP address.  IP
 address reservation and discovery relies on Brunet's DHT.  Each VPN stores its
@@ -276,64 +316,65 @@ The process for creating connections begins when IPOP receives an outgoing
 message.  First it parses the destination address and queries the DHT for the
 remote peers P2P address.  The peer then attempts to form a secure, direct
 connection with the remote peer using Brunet's secure messaging layer.  Once
-that has formed, packets to that IP address are directed over that secure link.
+that has formed, packets to virtual IP address are directed over that secure
+link.
 
 In our original design~\cite{vtdc}, the virtual network was secured through a
 kernel-level IPsec stack, a model kept through our first generation Archer
-deployment.  This approach only secures virtual network links between parties
-and does not secure the P2P layer; furthermore, in IPsec configuration each
-peer requires a unique rule for every other peer, which limited the maximum
-number of peers in the VPN.  Securing the P2P layer is important, otherwise
+deployment.  This approach limits security to virtual network links between
+parties leaving the P2P layer insecure; furthermore, in IPsec configuration
+each peer requires a unique rule for every other peer, which limited the
+maximum number of peers in the VPN.  Without security for the P2P layer,
 malicious users could easily derail the entire system, but securing with IPsec
 would practically negate the benefits of the P2P system, because of network
 configuration issues related to NATs and firewalls.  In our modern deployments,
 we have employed the security layer at the P2P layer, which in turn also
 secures virtual networking links.
 
-For grids that rely upon VPNs to connect resources and users, this can impose
-the need for a certificate for the VPN and one for the grid.  Though in our
-approach, we avoid this problem by using a VPN that allows a user to verify the
-identity of a remote peer and obtain its certificate, and have taken advantage
-of hooks in grid software that are called to verify a remote peers
-authenticity.  In other words, user access is limited by the VPN and identity
-inside the grid is maintained by that same certificate.  This might not be
-possible if all users were submitting from the same resources but is feasible
-in our system since each user submits from their own system.
+Grids that rely upon VPNs to connect resources and users may impose the need
+for a certificate for the VPN and one for the grid.  Our approach avoids this
+problem by using a VPN that allows a user to verify the identity of a remote
+peer and obtain its certificate, which then through software hooks in the grid
+software verifies the remote peers identity in terms relevant to the grid.  In
+other words, user access is limited by the VPN and identity inside the grid is
+maintained by that same certificate.  This might not be possible if all users
+were submitting from the same resources but is feasible in our system since
+each user submits from their own system.
 
 \subsection{Virtual Machines in Grid Computing}
 
 Earlier work~\cite{fig_grid} advocated the use of virtual machines (VMs) in
 grid computing for improved security and customization.  Others
-since~\cite{sandbox, dve, ourgrid_paper} have been established VMs as means for
+since~\cite{sandbox,dve,ourgrid_paper} have been established VMs as means for
 sandboxing, that is environments that allow untrusted users to use trusted
-resources in a limited fashion.  VMs run as a process on a system, where
-processes running inside the VM have no access to the host operating system.
-Furthermore, VMs can have limited or no networking access as controlled by the
-host, which effectively seals them in a cage or sandbox protecting the hosts
-environment.  VMs are also useful for customization and legacy applications,
-since a developer can configure the VM and then distribute it as an appliance,
-with the only requirement on the end user being that they have a VM software or
-manager.  Quantitatively, previous work has shown that CPU-bound tasks perform
-fairly well running with no more than 10\% overhead and in some cases 0\%,
-which is the case with VMs like Xen.
+resources in a limited fashion.  VMs run as a process on a system, limiting
+processes running inside the VM from accessing the host operating system.
+Furthermore, a VM's network access may be limited by the host, effectively
+sealing them in a cage or sandbox protecting the hosts environment.  VMs are
+also useful for customization and legacy applications, since a developer can
+configure the VM and then distribute it as an appliance, with the only
+requirement of the end user having VM manager software installed.
+Quantitatively, previous work has shown that CPU-bound tasks perform fairly
+well running with no more than 10\% overhead and in some cases 0\%, which is
+the case with VMs like Xen.
 
 While not a direct correlation to grid computing, clouds have benefited
-significantly from VMs.  VMs are the magic behind cloud infrastructures that
-provide IaaS, such as EC2.  In these environments, users are able to create
-customized instances, or packaged operating systems and applications, inside of
-cloud environments, share with each other, and dynamically create or shutdown
-them as necessary.  While the application of clouds is generic, it can easily
-be applied towards grids.  A user can create push excess jobs into the cloud,
-when there is overflow, high demands, or the user does not want to maintain
-their own hardware.  One challenge, however, is the dynamic creation of a grid
-as well as extension of an existing grid using the cloud, challenges that are
-addressed in this paper.
+significantly from VMs, as they provide the magic behind cloud infrastructures
+that provide IaaS, such as EC2.  In these environments, users are able to
+create customized instances, or packaged operating systems and applications,
+inside of cloud environments; share with each other; and dynamically create or
+shutdown them as necessary.  While the application of clouds is generic, it can
+easily be applied towards grids.  A user can create push excess jobs into the
+cloud, when there is overflow, high demand, or the user lacks their own
+hardware infrastructure.  One challenge, however, is the dynamic creation of a
+grid as well as extension of an existing grid using the cloud, challenges that
+are addressed in this paper.
 
 \section{Architectural Overview}
 \label{architecture}
 
 Our approach attempts to reuse as many available components to design a grid
-middleware generic enough that th ideas can be applied to other middleware
+middleware generic enough that the ideas can be applied to other middleware
 stacks.  As a result, our contribution in this paper and in particular this
 section focuses primarily on the following key tasks:  making grid construction
 easy, supporting decentralized user access, sandboxing the users environment,
@@ -403,40 +444,41 @@ No built-in support for shared file systems
 
 Before deploying any software or configuring any hardware, a grid needs
 organization including certificate management, grid access, user account
-management, and delegation of responsibilities.  These are complex questions,
-which can be challenging to address, though for less restrictive systems, like
-a collection of academic labs sharing clusters, they may be very easy.  One of
-the professors could handle the initial authorization of all the other labs and
-then delegate to them the responsibility of allowing their affiliates, such as
-students and scholars access.
+management, and delegation of responsibilities.  These are complex
+requirements, which can be challenging to address, though for less restrictive
+systems, like a collection of academic labs sharing clusters, they may be very
+easy.  One of the professors could handle the initial authorization of all the
+other labs and then delegate the responsibility of providing access to their
+their affiliates, such as students and scholars access.
 
 For academic environments, grids become more challenging when the professor or
 worse yet students must maintain the certificates, handling certificate
-requests, and placing signed certificates in the correct location.  Our
-solution to this potentially confusing area was a group interface, akin to
-something like Facebook's or Google's groups.  Albeit, those types of groups
-are not hierarchal, which is a necessity in order to have delegated
-responsibilities.  Thus we have a two layer approach, a grid group for members
-of the grid trusted by the grid organizers and user groups for those who are
-trusted by those in the grid group.  Members of the grid group can create their
-own user groups.  A member of a user group can gain access to the grid by
-downloading grid configuration data available within the user group web
-interface.  This configuration data comes in the format of a disk image, when
-added to a ``Grid Appliance'' VM, it is used to obtain the user's credentials
-and enabling them to connect to the grid.
+requests, and placing signed certificates in the correct location.  Security is
+a serious topic and should ideally be handled by those that understand its
+nuances.  Our solution to this potentially confusing area was a group
+interface, akin to something like Facebook's or Google's groups.  Albeit, those
+types of groups are not hierarchal, which is a necessity in order to have
+delegated responsibilities.  Thus we have a two layer approach, a grid group
+for members of the grid trusted by the grid organizers and user groups for
+those who are trusted by those in the grid group.  Members of the grid group
+can create their own user groups.  A member of a user group can gain access to
+the grid by downloading grid configuration data available within the user group
+web interface.  This configuration data comes in the format of a disk image,
+when added to a ``Grid Appliance'' VM, it is used to obtain the user's
+credentials and enabling them to connect to the grid.
 
 To give an example, consider our computer architecture grid, Archer.  Archer
 was seeded initially by the University of Florida, so we are the founders and
 maintainers of the Archer grid group.  As new universities and independent
 researchers have joined Archer, they request access to this group.  Upon
 receiving approval, they then need to form their own user group so that they
-can allow others to connect to the grid.  So a trusted member might create a user
-group titled ``Archer for University X'' and all members of university X will
-apply for membership in that group.  The creator can make decisions to either
-accept or deny these users.  Once the user has access, they will download their
-configuration data formatted as a virtual disk image and the ``Grid Appliance''
-VM and start the ``VM.''  After starting the VM, the user will be connected to
-the grid and able to submit and receive jobs.
+can allow others to connect to the grid.  So a trusted member might create a
+user group titled ``Archer for University X'' and all members of university X
+will apply for membership in that group.  The creator can make decisions to
+either accept or deny these users.  Once the user has access, they will
+download their configuration data formatted as a virtual disk image and the
+``Grid Appliance'' VM and start the ``VM.''  After starting the VM, the user
+automatically be connected to Archer and able to submit and receive jobs.
 
 \begin{figure*}[ht]
 \centering
@@ -459,38 +501,41 @@ this process, the configuration data contains cryptographic information that
 facilitates acquisition of a signed certificate from the web interface through
 XML-RPC over HTTPS.  The process begins by either booting the ``Grid
 Appliance'' or restarting a ``Grid Appliance'' service.  When starting the
-service will detect if there is new configuration data, and if there is, it
+service will detect if there is new configuration data, if there is, it
 contacts the web interface with the cryptographic information and a public key.
-The web interface verifies the user's identity, retrieves their profile from
-its database and binds that information with the public key to create a
-certificate request, which will then be signed and returned to the user.
+The web interface verifies the user's identity using this cryptographic
+information, retrieves their profile from its database and binds that
+information with the public key to create a certificate request, which will
+then be signed and returned to the user.
 
 With a public web interface, we have been able to create a variety communities.
-One of particular interest is not the grid itself but rather a bootstrapping
-community for grids.  The web interface has been designed to support many grid
-groups, so too has the P2P infrastructure as it supports bootstrapping into
-unique private overlays for individual grids by means of Brunet's ability to
-support recursive bootstrapping.  By using the public interface, users have an
-opportunity to reuse our bootstrap infrastructure and only need to focus on the
-configuration of their VPN and grid services, which has been trivialized to
-accepting or denying users access to a group and turning on resources.  We
-would like to note that there is no need to make an explicit public grid
-community through the web interface, since all ``Grid Appliances'' come with a
-default configuration file that will connect them to an insecure public grid.  
+By bringing so many individuals from disperse locations, we have been able to
+foster a large distribution of peers who all contribute in a bootstrapping
+community for others in the P2P system on which the grids run.  The web
+interface has been designed to support many grid groups, so too has the P2P
+infrastructure as it supports bootstrapping into unique private overlays for
+individual grids by means of Brunet's ability to support recursive
+bootstrapping.  By using the public interface, users have an opportunity to
+reuse our bootstrap infrastructure and only need to focus on the configuration
+of their VPN and grid services, which has been trivialized to accepting or
+denying users access to a group and turning on resources.  We would like to
+note that there is no need to make an explicit public grid community through
+the web interface, since all ``Grid Appliances'' come with a default
+configuration file that will connect them to an insecure public grid.
 
 \subsection{The Organization of the Grid}
 
-The previous section focused facilitation of grid configuration using the web
-interface and skirted the issues of detailed configuration and organization.
-The configuration of the grid mirrors that of the connection process.  The
-first tier group maps to a common grid and each grid maps to a VPN.  Thus when
-a user creates a new grid group, they are actually configuring a new VPN, which
-involves address range, security parameters, user agreements, and the name of
-the group.  The system provides defaults for address range and security
-parameters, so users can focus on high level details like the user agreement
-and the grid's name.
+The previous section focused on facilitation of grid configuration using the
+web interface and skirted the issues of detailed configuration and
+organization.  The configuration of the grid mirrors that of the connection
+process.  The first tier group maps to a common grid and each grid maps to a
+VPN.  Thus when a user creates a new grid group, they are actually configuring
+a new VPN, which involves address range, security parameters, user agreements,
+and the name of the group.  The system provides defaults for address range and
+security parameters, so users can focus on high level details like the user
+agreement and the grid's name.
 
-As mentioned earlier, the second tier of groups enables members in the grid
+As mentioned previously, the second tier of groups enables members in the grid
 group to provide access to their community.  It is also the location that users
 download their configuration data.  The configuration files come in three
 flavors: submission, worker, or manager.  Worker nodes strictly run jobs.
@@ -652,7 +697,6 @@ of an appliance, will automatically that appliance's NFS export without the
 need for super-user intervention.  Mounts are automatically unmounted after a
 sufficient period of time without any access to the mounted file system.  
 
-\clearpage
 \section{Deploying a Campus Grid}
 \label{case_study}
 
@@ -690,17 +734,17 @@ NAT; and the Eucalyptus resources appear to have an ``iptables'' NAT.
 \subsection{Traditional Configuration of a Campus Grid}
 
 A VPN must be used to connect the resources due to the lack of network symmetry
-across the sites.  There exists a wealth of VPNs available~\cite{hamachi,
-openvpn, tinc} and some explicitly for grids~\cite{violin, vine, vnet}.  For
-simplicity sake, OpenVPN was chosen due to the simplicity in its configuration.
-In reality, OpenVPN makes a poor choice because it is centralized, thus all
-traffic between submitter and worker must traverse the VPNs server.  Whereas
-others in the list are distributed and thus allow nodes to communicate
-directly, but in order to do so, manual setup is required, a process, that
-would overwhelm many novice grid deployers.  In all these cases, the VPN
-requires that at least a single node have a public address, thus we had to make
-a single concession in the design of this grid, that is, the OpenVPN server
-runs on a public node.
+across the sites.  There exists a wealth of VPNs
+available~\cite{hamachi,openvpn,tinc} and some explicitly for
+grids~\cite{violin,vine,vnet}.  For simplicity sake, OpenVPN was chosen due to
+the simplicity in its configuration.  In reality, OpenVPN makes a poor choice
+because it is centralized, thus all traffic between submitter and worker must
+traverse the VPNs server.  Whereas others in the list are distributed and thus
+allow nodes to communicate directly, but in order to do so, manual setup is
+required, a process, that would overwhelm many novice grid deployers.  In all
+these cases, the VPN requires that at least a single node have a public
+address, thus we had to make a single concession in the design of this grid,
+that is, the OpenVPN server runs on a public node.
 
 In order to connect to OpenVPN, it must know the server's address and have a
 signed certificate.  While typically, most administrators would want a unique
@@ -939,8 +983,8 @@ debugging.  Though Amazon is not free, with Future Grid, grid researchers now
 have free access to both Eucalyptus and Nimbus clouds.  Many bugs can be
 difficult to reproduce in small system tests or booting one system at a time.
 By starting many instances simultaneously, we have been able to quickly
-reproduce problems and isolate them, leading to timely resolutions, and
-verification of those fixes.
+reproduce and isolate problems, leading to timely resolutions, and verification
+of those fixes.
 
 \subsection{Stacked File Systems}
 
@@ -1067,6 +1111,10 @@ accessible for remote debugging by an administrator.  Most users involved are
 extremely delighted with the process as it has an appearance that the system
 ``just works.''
 
+\subsection{Handling Upgrades}
+
+\subsection{Enabling Access to Manager and Worker Systems}
+
 \section{Related Work}
 \label{related_work}
 
@@ -1105,6 +1153,17 @@ dynamic grids inside the Nimbus cloud~\cite{alien_grid}.  While this approach
 can reproduce similar features of the ``Grid Appliance,'' such as creating
 grids inside the cloud, there are challenges in addressing cloud bursting,
 automated signing of certificates, and collaboration amongst disparate groups.
+
+Contextualization has made even further in roads through a project known as
+``Globus Provision\footnote{\url{http://globus.org/provision}},'' which creates
+an entire Globus and Condor pool in the clouds.  Our approaches are orthogonal
+in many ways.  For example, Globus seeks to create a traditional grid with
+users sharing common submission points and having dedicated entry points into
+and across the grid.   While ``Globus Provision'' could allow remote access
+into a ``Grid Appliane'' system, it is not trivial to add a ``Grid Appliance''
+system into a ``Globus Provision'' system.  As the ``Globus Provision'' system
+would require each user to authenticate with the ``Globus'' agents or have a
+set of trusted systems act on behalf of the ``Grid Appliance'' system.
 
 \section{Conclusions}
 \label{conclusions}
@@ -1149,7 +1208,8 @@ NSF under grant 091812 (Future Grid).  Any opinions, findings and conclusions
 or recommendations expressed in this material are those of the authors and do
 not necessarily reflect the views of the NSF.
 
-\bibliographystyle{IEEEtran}
+\bibliographystyle{spmpsci}
+%IEEETran}
 \bibliography{DecentralizedGrids}
 
 \end{document}
