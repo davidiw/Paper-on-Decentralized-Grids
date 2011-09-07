@@ -32,6 +32,8 @@
 \widowpenalty=100000
 \clubpenalty=100000
 
+\journalname{Cluster Computing}
+
 \begin{document}
 
 \clubpenalty=10000
@@ -386,7 +388,7 @@ users own resources.
 %\setlength{\itemsep}{1pt}
 %\setlength{\parskip}{1pt}
 \centering
-\begin{tabular}[c]{|p{1.4cm}||p{3.475cm}|p{3.475cm}|p{3.475cm}|p{3.475cm}|} \hline
+\begin{tabular}[c]{|p{1.4cm}||p{3.475cm}|p{3.475cm}|p{3.46cm}|p{3.475cm}|} \hline
 & Description & Scalability & Job queue / submission site & API Requirements \\ \hline \hline
 Boinc &
 Volunteer computing, applications ship with Boinc and poll head node for data
@@ -488,13 +490,6 @@ starting the appliance, and connecting with a resource manager.}
 \label{fig:system}
 \end{figure*}
 
-\addtocounter{footnote}{1}
-\footnotetext[\value{footnote}]{\url{http://www.cs.wisc.edu/condor/CondorWeek2009/condor\_presentations/sfiligoi-Condor\_WAN\_scalability.pdf}}
-\addtocounter{footnote}{1}
-\footnotetext[\value{footnote}]{\url{http://www.clusterresources.com/docs/211}}
-\addtocounter{footnote}{1}
-\footnotetext[\value{footnote}]{\url{http://www.sun.com/offers/docs/Extreme\_Scalability\_SGE.pdf}}
-
 Joining is easy; a grid requires a user to sign onto a website and download a
 configuration data, which can then be used on multiple systems.  To support
 this process, the configuration data contains cryptographic information that
@@ -553,6 +548,13 @@ this key to learn of other managers to coordinate with each other.
 
 \subsubsection{Selecting a Middleware}
 
+\addtocounter{footnote}{1}
+\footnotetext[\value{footnote}]{\url{http://www.cs.wisc.edu/condor/CondorWeek2009/condor\_presentations/sfiligoi-Condor\_WAN\_scalability.pdf}}
+\addtocounter{footnote}{1}
+\footnotetext[\value{footnote}]{\url{http://www.clusterresources.com/docs/211}}
+\addtocounter{footnote}{1}
+\footnotetext[\value{footnote}]{\url{http://www.sun.com/offers/docs/Extreme\_Scalability\_SGE.pdf}}
+
 Our grid composition is largely based upon a desire to support a decentralized
 environment, while still retaining reliability and limiting our documentation
 support efforts.  As there exist many middlewares to support job submission and
@@ -597,19 +599,23 @@ minutes and new managers are added to the flock list.
 
 The following summarizes the configuration and organization of the grid.
 Minimally a grid will constitute a manager, some workers, and a submitter.
-Referencing Figure~\ref{fig:system} step ``1,'' during system boot, without
-user interaction, each machine contacts the group website to obtain a valid VPN
-certificate.  Whereupon, it connects to the P2P overlay whose bootstrap peers
-are listed inside the configuration file, ``step 2.''  At which point, the
-machine starts the VPN service running on top of the P2P overlay, also part of
-step ``2.'' The self-configuring VPN creates a transparent layer hiding from
-the user and administrators the complexity in setting up a common fabric that
-can handle potential network dynamics.  Machines automatically obtain a unique
-IP address and find their place inside the grid.  For a manager machine, this
+Referencing Figure~\ref{fig:system}, a user begins by creating an account on
+the group server, joining a group, and obtaining configuration data for use
+with the ``Grid Appliance.'' After adding the configuration data to a ``Grid
+Appliance'' system, the user will start the system initiating the automated
+system beginning with step ``1.'' During which and without user interaction,
+each machine contacts the group website to obtain a valid VPN certificate.
+Whereupon, it connects to the P2P overlay whose bootstrap peers are listed
+inside the configuration file, ``step 2.''  At which point, the machine starts
+the VPN service running on top of the P2P overlay, also part of step ``2.'' The
+self-configuring VPN creates a transparent layer hiding from the user and
+administrators the complexity in setting up a common fabric that can handle
+potential network dynamics.  Machines automatically obtain a unique IP address
+and find their place inside the grid, step ``3.''  For a manager machine, this
 means registering in the DHT (not shown), while clients and workers search for
-available managers by querying the DHT, step ``3;'' IPOP translates the IP to a
-P2P address, step ``4;'' and then client contacts the manager directly, step
-``5.''
+available managers by querying the DHT, step ``4;'' IPOP translates the IP to a
+P2P address, step ``5;'' and then client contacts the manager directly, step
+``6.''
 
 \subsection{Sandboxing Resources}
 
@@ -854,13 +860,51 @@ their software development.
 
 \subsection{Quantifying the Experience}
 
-The evaluation of these environments focuses on the time taken to dynamically
-allocate the resources, connect to the grid, and submit a simple job to all
-resources in the grid.  In both systems, a single manager and submission node
-were instantiated in separate VMs.  In the traditional setup, OpenVPN is run
-from the manager node.  Each component in the evaluation was run three times.
-Between iterations, the submission node and the manager node were restarted to
-clear any state.
+For evaluation, we consider two epochs: time to bootstrap a grid assuming all
+user configuration has been completed and time to submit and complete a job on
+all available resources.  The first task focuses on administrative time
+overheads for the self-configuring aspects of both systems, whereas the latter
+considers overheads introduced from the perspective of a user.
+
+All configurations consisted of a single manager and submission node located at
+the University of Florida though on different resources.  Because OpenVPN
+requires a public IP address, we ran a dedicated OpenVPN server also at the
+University of Florida.  The ``Grid Appliance'' relies on the PlanetLab
+bootstrap system distributed across the world and a group server running at the
+University of Florida.   Workers were started using virtual machines and cloud
+instances at Yale University using KVM and University of Chicago and the San
+Diego Supercomputer Center both using Nimbus as part of FutureGrid.  50 workers
+were started at each site and verified online prior to starting the experiment.
+
+To isolate the cost of self-configuration, all machines booted into a grid free
+running state remaining in that state while polling a server for the initiation
+of the experiment.  Workers query the server every 30 seconds waiting to find
+when to start the experiment.  Upon initiating the experiment, the server would
+count down from 120 seconds with the workers being told amount of time they
+needed to wait prior to enable a simultaneous start.  To determine how long it
+took for a node to connect to the manager, we examined the time the node
+appeared in the Condor Collector log and subtracted the initiation time as well
+as the 120 seconds delay.
+
+The purpose of the job was to evaluate how long it took an independent client
+to connect to each resource in the grid, transfer a trivial sized file, and
+receive notification of job completion.  Thus the job chosen was to sleep for
+600 seconds.
+
+The evaluation herein exhibits a significant improvement over our previous
+evaluation~\cite{hpdc11}.  In this evaluation, we are not only considering
+OpenVPN and ``Grid Appliance,'' we have recently done some radical redesign to
+the underlying systems to support a more active and event oriented system, to
+differentiate we call the previous system {\em old} and the current system {\em
+new}.  Furthermore, our previous experiment had a significant deficiency with
+regards to determining the overhead of bootstrapping, as the time for resources
+to actually start could impact the time to get connected to the overlay as
+there was no separation between starting a resource and it connecting to the
+grid.  Finally, we have included a set of resources that are on more
+constrained resources than before.  Previously, resources either ran on a
+public IP address or all behind a common NAT.  In this experiment, we have a
+set of workers behind a KVM NAT at Yale and the manager and submit node behind
+an IPTables firewall at the University of Florida.
 
 The times measured include the time from when the last grid resource was
 started to the time it reported to the manager node, Figure~\ref{fig:connect},
@@ -876,43 +920,54 @@ consisting of all 150 resources with 50 at each site.
 \begin{figure}[ht]
 \centering
 \epsfig{file=figs/connect.eps, width=2.75in}
-\caption{Comparison of times to construct a grid in various environments using
-both a statically configured grid and a grid constructed by the ``Grid
-Appliance.''  Legend:  EC2 - Amazon's EC2, Euca - Indiana University's
-Eucalyptus, UF - University of Florida's ACIS Lab resources, Static - OpenVPN,
-GA - Grid Appliance.}
+\caption{Time in seconds for the self-configuring components of the grid to
+activate and connect workers to a manager.}
 \label{fig:connect}
 \end{figure}
+
+Connection times in the grids are presented in Figure~\ref{fig:connect}.
+Static or OpenVPN based grids certainly have the least amount of time in
+self-configuration as the system comes nearly completely configured.  The only
+component left unconfigured is the IP address, which is provided by the central
+server.  The old system relied on polling the VPN system to determine when an
+IP address was allocated in order to start Condor, in contrast to the new
+system which uses routing sockets.  Additionally the new system contains
+significantly more aggressive NAT traversal and connection establishment.  The
+large delay between connections in the old and new systems stems from the
+underlying polling nature of Condor.  Condor uses a static delay in order to
+determine how frequently to contact a manager.  If the packet is dropped, the
+system will have to wait for the next cycle.  Packet drops can occur in the P2P
+system, because of delayed connection establishment and potentially due to
+having an inadequate buffer in the VPN, which is part of an ongoing
+investigation.  The slope in the curves relates to either the manager queue for
+more narrow slopes and to delays in connecting to the overlay for wider slopes.
 
 \begin{figure}[ht]
 \centering
 \epsfig{file=figs/run.eps, width=2.75in}
-\caption{Comparison of times to run a 300 second job on each resource in
-various grids configured statically and through the ``Grid Appliance.''
-Legend:  EC2 - Amazon's EC2, Euca - Indiana University's Eucalyptus, UF -
-University of Florida's ACIS Lab resources, Static - OpenVPN, GA - Grid
-Appliance.}
+\caption{Time in seconds for a 600 minute job to complete on resources
+connected to a grid.}
 \label{fig:run}
 \end{figure}
 
-In the previous section, we qualified why the approach was easier than
-configuring a grid by hand, though by doing so we introduce overheads related
-to configuration and organization.  The evaluation verifies that these
-overheads do not conflict with the utility of our approach.  Not only do
-resources within a cluster install the VMs and connect to the grid quickly, the
-clouds do as well.  While the results were similar, it should be noted that the
-time required to configure the static approach was not taken into effect.  A
-process that is difficult to measure and is largely reliant on the ability of
-the administrator and the tools used.  Whereas the time for the ``Grid
-Appliance'' does include many of these components.
+The results from running jobs are shown in Figure~\ref{fig:run}.  Interestingly
+enough, in no run was a single resource able to gain access to all resources in
+the first attempt, represented by nodes finishing significantly later than the
+origin.  In the previous experiments~\cite{hpdc11}, this was not the case;
+however, since this experiment consists of a more restrictive system the
+results were not unexpected.   The most important conclusion is that our new
+approach presents an actual negligible overhead even for extremely short jobs.
 
-It should be stated that the evaluation only has a single submission node.  In
-a system with multiple submitters, the OpenVPN server could easily become a
-bandwidth bottleneck in the system as all data must pass through it, which can
-be avoided using IPOP.  Additionally, the current ``Grid Appliance'' relies on
-polling with long delays, so as to not have negative effects on the system.
-Either shrinking those times or moving to an event based system should
-significantly improve the speed at which connectivity occurs.  
+The outcome of the evaluations suggest that our new approach has taken away
+much of the overheads that had previously existed.  This is particularly
+impressive when considering all the additional automated work that the ``Grid
+Appliance'' handles in comparison to all the manual labor required in order to
+create the static systems, something that can not be reasonably quantitatively
+evaluated.  Also since the evaluation consists of only a single submit node and
+a negligible transfer overheads of using OpenVPN are not readily apparent.  In
+a system with multiple submitters, the OpenVPN server will become both a
+bandwidth and latency bottleneck in the system as all data must pass through
+it, which can be avoided using IPOP.  
 
 \section{Lessons Learned}
 \label{lessons_learned}
@@ -963,6 +1018,14 @@ other rather than through the VPN.  That means if they are on a gigabit
 network, they can full network speeds as opposed to being limited to 20\% of
 that due to the VPN, overheads discussed in~\cite{sc09}.
 
+With the use of APT repositories and unattended upgrades, we have enabled our
+Debian based systems to automatically upgrade without user intervention in case
+of upgrade failures.  This is in contrast to our old method of having a single
+monolithic package and package management technique that we employed
+previously.  Using existing package managers and distribution systems reduces
+our dependency count and also enables users to easily accept or reject upgrades
+by following well documented procedures.
+
 \subsection{Advantages of the Cloud}
 
 We have had the experience of deploying the ``Grid Appliance'' on three
@@ -976,7 +1039,7 @@ Appliance'' cloud instances can be configured via user-data, which is the same
 configuration data used as the virtual and physical machines, albeit zip
 compressed.  The ``Grid Appliance'' seeks the configuration data by first
 checking for a physical floppy disk, then in specific directory
-(\url{/opt/grid\_appliance/var/floppy.img}), followed by the EC2 / Eucalyptus
+(\url{/opt/grid_appliance/var/floppy.img}), followed by the EC2 / Eucalyptus
 URL, and finally the Nimbus URL.  Upon finding a floppy and mounting it, the
 system continues on with configuration.  Clouds have been also very useful for
 debugging.  Though Amazon is not free, with Future Grid, grid researchers now
@@ -1110,8 +1173,6 @@ supporting all-to-all connectivity, any resource connected to the VPN is
 accessible for remote debugging by an administrator.  Most users involved are
 extremely delighted with the process as it has an appearance that the system
 ``just works.''
-
-\subsection{Handling Upgrades}
 
 \subsection{Enabling Access to Manager and Worker Systems}
 
