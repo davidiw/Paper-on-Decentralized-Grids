@@ -972,6 +972,141 @@ a system with multiple submitters, the OpenVPN server will become both a
 bandwidth and latency bottleneck in the system as all data must pass through
 it, which can be avoided using IPOP.
 
+\subsection{Batch Scheduling Tasks}
+
+The previous evaluation focused on the self-configuring aspects of the ``Grid
+Appliance,'' it did not showcase the value offered by having seamless
+extensions to a grid.  With the ``Grid Appliance,'' a user can take an existing
+cluster and connect with others for mutual sharing of resources, users' can
+potentially complete tasks faster if not equally as fast with their cluster
+alone.  We evaluated this behavior by constructing two different types of
+systems: 1) a cluster consisting of 10 resources and 1 submit node and 2) a
+grid created by the ``Grid Appliance'' consisting of 4 clusters each with 10
+resources each and a submit node co-located with one of the clusters.  Taking
+these systems, we ran 40 jobs such that each resource in the first system ran 4
+and each resource in the second ran one job.
+
+The first system consisted of resources located at the University of Florida
+all connected to the same network switch.  The second system spanned the
+University of Florida, Florida State University, Northeastern University, and
+University of Texas at Austin with the submit node located at the University of
+Florida, all resources were behind various Cisco and IPtables based firewalls
+and NATs.  The task selected came from a virtual computing course taught at the
+University of
+Florida\footnote{\url{http://www.grid-appliance.org/wiki/index.php/EEL6892_Spring_11_HW_2:_Understanding_Simics}},
+specifically use Simics with a simulated cache to run a GCC check point for
+500,000,000 cycles.  The specific details are unimportant as the purpose of the
+evaluation was to investigate wide area overheads of using the system.  Another
+important detail is that we only use Condor for scheduling the job, files are
+actually transferred via the NFS, thus only blocks required for running the
+checkpoint will be transferred.
+
+\begin{figure}[ht]
+\centering
+\epsfig{file=figs/simics.eps, width=2.75in}
+\caption{Time in seconds for running batch tasks in a local cluster and a
+distributed grid.}
+\label{fig:simics}
+\end{figure}
+
+The results for our evaluation are presented in Figure~\ref{fig:simics}.
+Clearly as anticipated, having more resources solved the problem much more
+quickly.  The graph shows a completion delay between resources running locally,
+at the University of Florida, in comparison to those running at the other
+institutions.  While network overheads certainly played a role in this, they
+were not as significant as the fact that the hardware at the other sites was
+one year older and clearly out performed by the University of Florida
+resources.  The only reason why the first round of cluster results came in more
+slowly than the grid was due to Condor's polling based scheduling system.
+
+\section{An Academic Tool for Parallel Computing}
+
+Our second case study explores the possibility of using Grid Appliance as a
+medium for enabling academic investigations into parallel computing systems.
+While these frameworks are not particularly complicated in configuring, they
+may take considerable time for first time users.  Also they require the user to
+have complete control over the set of resources.  Using Condor to deploy these
+types of jobs requires that submission from a single entry point and resources
+be dedicated, something not typically done in Condor pools.  As a result, we
+defined a container for parallel computing systems that works well with the two
+we have considered thus far:
+MPICH2\footnote{\url{http://www.mcs.anl.gov/research/projects/mpich2/}} and
+Hadoop\footnote{\url{http://hadoop.apache.org}}.
+
+\subsection{Traditional Configuration}
+
+Both MPICH2 and Hadoop require a similar setup.  They both begin by an
+administrator installing the frameworks and the necessary support libraries on
+each resource.  In order for the systems to {\emph self-configure}, the
+administrator will need to install a common user and SSH key on each resource.
+All but one of the resources will be slave nodes with the other being the
+master node.  The system is configured and tasks are submitted from the master
+node, which will push the requests out to the slaves.  In order to connect to
+the slaves, the master keeps a file containing all the hostnames of the slaves
+and has access to the private SSH key enabling passwordless access to the
+slaves.  At which point, the systems can be started and tasks submitted.
+
+\subsection{Grid Appliance Configuration}
+
+In designing our framework, we wanted a user to go from an unconfigured
+environment to running tasks with as minimal effort as possible.  Using the
+``Grid Appliance's'' other components as our baseline, we already had
+all-to-all connectivity and the ability to start applications remotely via IPOP
+and Condor, respectively.  Our initial approach was to use Condor to distribute
+configuration in order to run SSH server at each node and then use this SSH
+session in configuration of the parallel framework.  Unfortunately, this
+approach was fraught with problems.  Many of these tools assumed a common user
+on each resource; however, in Condor, a unique user will be used for each task
+in a multiple CPU machine.  Additionally, there was a non-trivial issue of
+ensuring that multiple SSH session for parallel frameworks would not conflict.
+
+Going back to the drawing boards, we dissected the parallel frameworks in order
+to understand how they worked.  While the traditional configuration of most
+parallel frameworks follow what was described earlier, the use of a single
+point capable of starting and stopping the system via SSH is not required.  By
+investigating the actual SSH calls, we discovered that the SSH was starting a
+binary on each of the slaves and passing in by command-line arguments
+information about the master.  The rest of the configuration happened between
+processes running on the master and slaves independent of any channeling via
+SSH.
+
+With this knowledge in hand, we began applying the constraints provided by the
+``Grid Appliance'' to this configuration.  The new approach was to start a
+Python based XML-RPC server on the submission node, it would be responsible for
+waiting for all nodes to join as well as triggering the start and end of tasks.
+Each of the slaves would start an XML-RPC server as well, register their IP and
+port with the master and wait for a notification to start.  Once the master
+heard from all the slaves, it would notify the slaves to configure the parallel
+framework.  At this point, the framework would be running and tasks could be
+submitted into the system.  The system supports both interactive sessions as
+well as batch requests.  At the conclusion of batch requests, the master will
+notify the slaves via XML-RPC and notify them to end.  An interactive session
+would conclude with a user running a script that would notify the master's
+XML-RPC server to initiate termination with the slaves.
+
+The only unresolved issue is dealing with frameworks files and required
+libraries, which may not be installed on the remote machines.  Fortunately,
+each ``Grid Appliance'' has a NFS mount, which can be used to host these files.
+When a job gets executed on a remote machine, it simply updates the appropriate
+Unix environmental variables to know about the NFS and the libraries and files
+it hosts.
+
+The end result is the following.  The user installs our package for MPI or
+Hadoop into their NFS share.  The user will then run a script that requests how
+many nodes to provide and optionally a file for batch tasks.  This will start
+the XML-RPC server and generate a condor submit script which will then be
+submitted to Condor.  As the nodes are claimed by Condor for this task, the
+XML-RPC server on the master will receive incoming requests for registration.
+Once all the expected slaves have registered, the master will send a signal to
+all of them notifying them to start the parallel framework.  Each slave will
+access the required files by the NFS share from the master and start the
+parallel framework.  Upon completion, they will notify the master of the port
+where they started the parallel framework session.  When all have responded,
+the master finalizes its configuration and either batch tasks will be executed
+or user interaction will be enabled.
+
+\subsection{Quantifying the Experience}
+
 \section{Lessons Learned}
 \label{lessons_learned}
 
@@ -987,7 +1122,11 @@ currently spans six seed universities contributing over 600 CPUs as well as
 contributions and activities from external users.  The Archer grid has been
 accessed by hundreds of students and researchers from over a dozen institutions
 submitting jobs totaling over 500,000 hours of job execution in the past two
-years alone.
+years alone.  The batch scheduling of Simics evaluation actually used Archer
+resources.  In practice, we have seen that there has been minimal conflict in
+resource demands on the syste, and even when there is higher demand, each user
+is guaranteed high priority on their own resources.  Thus we have only heard
+praises and no complaints with regards to the availability of resources.
 
 The Grid Appliance has also been utilized by groups at the Universities of
 Florida, Clemson, Arkansas, and Northwestern Switzerland as a tool for teaching
@@ -1007,9 +1146,9 @@ Because of the demands put on Archer in terms of avoiding the overheads of
 virtualization and the perceived simplicity of managing physical resources as
 opposed to virtual resources running on top of a physical resources, many users
 have requested the ability to run Grid Appliances directly on their machine.
-Unlike clouds with machine imamges such as AMIs or VM appliances, physical
+Unlike clouds with machine images such as AMIs or VM appliances, physical
 machines images cannot be easily exported.  Most physical OS installed on
-phyiscal machines will need some some custom tailoring to handle environment
+physical machines will need some some custom tailoring to handle environment
 specific issues.
 
 With this in mind, we moved away from stackable file systems and towards
@@ -1021,12 +1160,14 @@ other rather than through the VPN.  That means if they are on a gigabit
 network, they can full network speeds as opposed to being limited to 20\% of
 that due to the VPN, overheads discussed in~\cite{sc09}.
 
-With the use of APT repositories and unattended upgrades, we have enabled our Debian based systems to automatically upgrade without user intervention in case
-of upgrade failures.  This is in contrast to our old method of having a single
-monolithic package and package management technique that we employed
-previously.  Using existing package managers and distribution systems reduces
-our dependency count and also enables users to easily accept or reject upgrades
-by following well documented procedures.
+Using an APT repository in combination with unattended upgrades, we have
+enabled our Debian based systems to automatically upgrade minimizing concerns
+about upgrade failures and requirements for user intervention.  This is in
+contrast to our old method of having a single monolithic package and package
+management technique that we employed previously.  Using existing package
+managers and distribution systems reduces our dependency count and also enables
+users to easily accept or reject upgrades by following well documented
+procedures.
 
 \subsection{Advantages of the Cloud}
 
@@ -1184,9 +1325,9 @@ disable ``su'' and ``sudo,'' but also only enabled accounts on submit nodes,
 where users would be guaranteed to access the system and hence more likely to
 change the password.  Unfortunately this prevents users from easily accessing
 worker and manager resources.  More advanced users who were setting up their
-own systems would occassionally want to access these resources for debugging
-purposes or to enable additonal features in live systems.  While a user could
-provide a SSH key in the floppy, which is done for the administrator backdoor,
+own systems would occasionally want to access these resources for debugging
+purposes or to enable additional features in live systems.  While a user could
+provide a SSH key in the floppy, which is done for the administrator back door,
 there is not a clear cut way for a user to identify a resource without directly
 accessing it via a console.  We have devised some multicast discovery
 applications as well as employed network search tools such as nmap, but their
@@ -1263,7 +1404,7 @@ set of trusted systems act on behalf of the ``Grid Appliance'' system.
 
 In this paper, we have presented a grid framework that enables users to easily
 deploy their own grids.  By reducing the entry barrier to constructing
-wide-area grids, rather than just prividing a grid, our approach teaches users
+wide-area grids, rather than just providing a grid, our approach teaches users
 to create grids rather than providing access.  The features of the ``Grid
 Appliance'' significantly simplify the construction of a grid over traditional
 approaches.  These methods are based upon and have been verified through
@@ -1291,7 +1432,10 @@ Appliance'' by using a decentralized grid system that requires no manager
 nodes, though the challenges in doing so, are efficient resource discovery,
 clustering of group resources, and fair use scheduling.  A completely
 decentralized grid could be constructed completely by client machines, in
-which, no one is more responsible than another for maintaining the grid.
+which, no one is more responsible than another for maintaining the grid.  While
+the parallel framework works quite well it can still be significantly improved
+by attempting to be scheduled on resources based upon proximity and supporting
+some form of reliability in order to deal with disappearing or reclaimed nodes.
 
 \section*{Acknowledgments}
 
