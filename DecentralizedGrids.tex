@@ -101,7 +101,7 @@ architectural description, this paper contains lessons learned during the
 development and deployment of ``Grid Appliance'' systems and a case study
 backed by quantitative analysis that verifies the utility of our approach.  
 
-\keywords{Grid, Cloud, P2P Grid}
+\keywords{Grid, Cluster, P2P, Parallel Applications, VPN, Cloud}
 
 \end{abstract}
 
@@ -959,7 +959,8 @@ the first attempt, represented by nodes finishing significantly later than the
 origin.  In the previous experiments~\cite{hpdc11}, this was not the case;
 however, since this experiment consists of a more restrictive system the
 results were not unexpected.   The most important conclusion is that our new
-approach presents an actual negligible overhead even for extremely short jobs.
+approach presents an actual negligible overhead even for extremely short jobs,
+whereas both approaches show a negligible overhead for very long running tasks.
 
 The outcome of the evaluations suggest that our new approach has taken away
 much of the overheads that had previously existed.  This is particularly
@@ -1016,8 +1017,34 @@ at the University of Florida, in comparison to those running at the other
 institutions.  While network overheads certainly played a role in this, they
 were not as significant as the fact that the hardware at the other sites was
 one year older and clearly out performed by the University of Florida
-resources.  The only reason why the first round of cluster results came in more
-slowly than the grid was due to Condor's polling based scheduling system.
+resources, see Table~\ref{tab:simics}.  The only reason why the first round of
+cluster results came in more slowly than the grid was due to Condor's polling
+based scheduling system.
+
+\begin{table}[ht]
+\small{
+%\setlength{\itemsep}{1pt}
+%\setlength{\parskip}{1pt}
+\centering
+\begin{tabular}[c]{|c|r@{.}lr@{.}l|} \hline
+& \multicolumn{2}{c}{Locally} & \multicolumn{2}{c|}{Grid Appliance} \\ \hline \hline
+Florida State Univ. & 5031&646 & 5175&556 \\ \hline
+Univ. of Florida & 4015&927 & 4065&1 \\ \hline
+Northeastern Univ. & 5032&643 & 5196&7 \\ \hline
+Northwestern Univ. & 5034&228 & 5185&7 \\ \hline
+\end{tabular}
+\caption{Execution times in seconds for the Simics task.}
+\label{tab:simics}
+}
+\end{table}
+
+One a side note, this evaluation does not cover the advantage of using NFS
+versus a full file transfer.  The results in Table~\ref{tab:simics} show the
+networking overhead when using NFS, but they do not represent the time to
+actually transfer the file and decompress it in the case of the local run.  The
+compressed file was 1.7 GB, which when decompressed produces a set of files
+consisting of 10.3 GB.  The file transfer and decompression are not
+non-negligible.
 
 \section{An Academic Tool for Parallel Computing}
 
@@ -1106,6 +1133,42 @@ the master finalizes its configuration and either batch tasks will be executed
 or user interaction will be enabled.
 
 \subsection{Quantifying the Experience}
+
+Like the previous evaluation comparing the standard grid to the ``Grid
+Appliance,'' this evaluation largely focuses on the overheads of using the
+self-organizing environments provided by our parallel framework and the ``Grid
+Appliance.'' Because MPI can be configured in so many different ways, we made
+the assumption that a user would install it on each resource and use SSH to
+complete the setup.  In contrast, when using the ``Grid Appliance'' none of the
+resources have MPI installed and only the submission site does.  The
+evaluations were run using Future Grid Nimbus resources at the Texas
+Advanced Computing Center located at the University of Texas at Austin.  We
+evaluated the time to construct an MPI ring or an environment that can accept
+MPI jobs and the time it took to run a job after the ring was constructed.  The
+MPI job was a 30 second sleep followed by a MPI ``HelloWorld.''
+
+\begin{table}[ht]
+\small{
+%\setlength{\itemsep}{1pt}
+%\setlength{\parskip}{1pt}
+\centering
+\begin{tabular}[c]{|c|r@{.}lr@{.}l|} \hline
+& \multicolumn{2}{c}{Traditional} & \multicolumn{2}{c|}{Grid Appliance} \\ \hline \hline
+MPI Initialization & 1&09 & 6&85 \\ \hline
+MPI Task & 30&35 & 30&54 \\ \hline
+\end{tabular}
+\caption{Time in seconds for the MPI.}
+\label{tab:mpi}
+}
+\end{table}
+
+Our evaluation results are presented in Table~\ref{tab:mpi}.  The actual task
+time is negligibly different.  Even the overheads for MPI ring formation are not
+significant.  The overhead primarily comes from waiting for all the nodes to
+receive the Condor job, as nothing will proceed until all of them have received
+the task and begun executing.  Most importantly as most MPI jobs do not last
+seconds, but rather, minutes, hours, or even longer, a delay of a few seconds
+can be considered negligible.
 
 \section{Lessons Learned}
 \label{lessons_learned}
@@ -1297,7 +1360,7 @@ still see some ``GroupVPNs''  using address ranges in normal private network
 address ranges for the VPN, like 10.0.0.0 - 10.255.255.255 and 192.168.0.0 -
 192.168.255.255.
 
-\subsection{Administrator Backdoor}
+\subsection{Administrator Back Door}
 
 While most administrators will agree that most problems that users encounter
 are self-inflicted, there are times, when the system is at fault.  Debugging
@@ -1308,7 +1371,7 @@ prohibitively complicated, as the user would need to relocate their ``Grid
 Appliance'' instance and have network connectivity in order to connect to the
 grid and show the problem to the administrator.  To address this and other
 concerns that only appear after running the system for long periods of time, we
-have supplied an administrator backdoor into all resources by installing our
+have supplied an administrator back door into all resources by installing our
 public ssh key, though users are informed of this and are free to remove it for
 privacy concerns.  In typical configurations, this approach might not be
 feasible, but because the ``Grid Appliance'' ships with a decentralized VPN
@@ -1346,7 +1409,7 @@ during authentication and store the Linux formatted password to the database.
 During the creation of a user account on a ``Grid Appliance,'' the encrypted
 format of the users password is then passed as a parameter into the user
 account adding application, {\em adduser}.  While for our system, we
-experienced no show stoppers, a system incorporating javascript and XML-RPC
+experienced no show stoppers, a system incorporating Javascript and XML-RPC
 (AJAX) to perform authentication may.
 
 \section{Related Work}
