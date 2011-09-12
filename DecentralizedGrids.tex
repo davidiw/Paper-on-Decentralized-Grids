@@ -134,14 +134,15 @@ may provision resources from multiple IaaS providers as well as their own local
 resources in order to avoid relying on one particular vendor, a painful lesson
 learned by those using Amazon's EC2 exclusively on April 21, 2011
 \footnote{\url{http://money.cnn.com/2011/04/21/technology/amazon_server_outage/index.htm}}.
-On that day and for some days ensuing, Amazon's web services were unavailable
-rendering many web sites out of commission.  A well balanced approach to avoid
-these types of dependencies results in a system with similar configuration
-demands to that of a distributed grid: while a cloud image can be encapsulated
-with a grid computing stack, it still needs configuration in terms of
-allocating and distributing the appropriate certificates, network configuration
-to establish end-to-end connectivity, and proper configuration of the
-middleware to establish worker, submit, and scheduler nodes.  
+On that day, Amazon's web services were unavailable and remained unavailable
+for a couple days following rendering many web sites and services out of
+commission.  A well balanced approach to avoid these types of dependencies
+results in a system with similar configuration demands to that of a distributed
+grid: while a cloud image can be encapsulated with a grid computing stack, it
+still needs configuration in terms of allocating and distributing the
+appropriate certificates, network configuration to establish end-to-end
+connectivity, and proper configuration of the middleware to establish worker,
+submit, and scheduler nodes.  
 
 In this paper, we present techniques that reduce the entry barrier in terms of
 necessary expertise and time investment in deploying and extending ad hoc,
@@ -176,19 +177,20 @@ available in the P2P network.}
 \end{figure}
 
 The ``Grid Appliance'' project and concepts have been actively developed and
-used in several projects for the past six years.  Of these projects, Archer, a
-distributed grid for computer architecture research, has demonstrated the
-feasibility and utility of this approach by deploying a shared collaborative
-infrastructure spanning clusters across six US universities, where the majority
-of the nodes are constrained by network address translation (NAT).  Every
-resource in Archer is configured in the same, simple manner:  by deploying a
-``Grid Appliance'' that self-configures to join a wide-area grid.  Researchers
-interested or desiring the ability to access both grid resources and
-specialized commercial simulation tools (such as Simics) can easily use and
-contribute resources from this shared pool with little effort by joining a
-website, downloading a configuration image and a virtual machine (VM), and
-starting the VM inside a VM manager (VMM).  Upon completion of the booting
-process, users are connected to the grid and able to submit and receive jobs.
+used in several projects for the past six years.  Of these projects,
+Archer\footnote{\url{http://www.archer-project.org}}, a distributed grid for
+computer architecture research, has demonstrated the feasibility and utility of
+this approach by deploying a shared collaborative infrastructure spanning
+clusters across six US universities, where the majority of the nodes are
+constrained by network address translation (NAT).  Every resource in Archer is
+configured in the same, simple manner:  by deploying a ``Grid Appliance'' that
+self-configures to join a wide-area grid.  Researchers interested or desiring
+the ability to access both grid resources and specialized commercial simulation
+tools (such as Simics) can easily use and contribute resources from this shared
+pool with little effort by joining a website, downloading a configuration image
+and a virtual machine (VM), and starting the VM inside a VM manager (VMM).
+Upon completion of the booting process, users are connected to the grid and
+able to submit and receive jobs.
 
 The ``Grid Appliance'' has more recently been used as an academic tool for
 exploring parallel computing through the Future Grid project.  MPI (Messaging
@@ -1187,7 +1189,7 @@ accessed by hundreds of students and researchers from over a dozen institutions
 submitting jobs totaling over 500,000 hours of job execution in the past two
 years alone.  The batch scheduling of Simics evaluation actually used Archer
 resources.  In practice, we have seen that there has been minimal conflict in
-resource demands on the syste, and even when there is higher demand, each user
+resource demands on the system, and even when there is higher demand, each user
 is guaranteed high priority on their own resources.  Thus we have only heard
 praises and no complaints with regards to the availability of resources.
 
